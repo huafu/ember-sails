@@ -27,6 +27,13 @@
   "author": "Huafu Gandon <huafu.gandon@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "semver": "^4.0.3"
+    "chai": "^1.9.2",
+    "grunt-cli": "^0.1.13",
+    "grunt-mocha-istanbul": "^2.1.0",
+    "istanbul": "^0.3.2",
+    "mocha": "^1.21.4",
+    "semver": "^4.0.3",
+    "sinon": "^1.10.3",
+    "supertest": "^0.14.0"
   }
 }

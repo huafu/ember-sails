@@ -14,7 +14,7 @@ PROD = --prod
 endif
 
 define ember
-	cd $(UI) && $(BIN)/ember $(1)
+	cd $(UI) && $(BIN)/ember $(1) && cd ..
 endef
 
 define sails
@@ -31,8 +31,9 @@ clean:
 		rm -rf dist tmp
 
 
-test:
-	@$(call ember,test --environment $(ENV))
+tests:
+	@$(call ember,test --environment $(ENV)) && \
+		$(BIN)/grunt test
 
 
 #TODO: improve this so that it uses forever or such

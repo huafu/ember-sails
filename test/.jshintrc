@@ -1,0 +1,10 @@
+{
+  "node":   true,
+  "predef": [
+    "_",
+    "sails",
+    "expect",
+    "sinon",
+    "Sails"
+  ]
+}
