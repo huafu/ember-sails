@@ -7,10 +7,11 @@ endif
 NODE_ENV = ENV
 ifeq ($(ENV),development)
 VERBOSE = --verbose
+PROD =
 else
 VERBOSE =
+PROD = --prod
 endif
-
 
 define ember
 	cd $(UI) && $(BIN)/ember $(1)
@@ -31,7 +32,7 @@ clean:
 
 
 test:
-	@$(call ember,test)
+	@$(call ember,test --environment $(ENV))
 
 
 #TODO: improve this so that it uses forever or such
@@ -39,10 +40,10 @@ serve: build serve-api
 
 
 serve-ui:
-	@$(call ember,serve)
+	@$(call ember,serve --environment $(ENV))
 
 serve-api:
-	@$(call sails,lift $(VERBOSE))
+	@$(call sails,lift $(PROD) $(VERBOSE))
 
 
 install:
