@@ -1,25 +1,48 @@
 UI = ember
 BIN = ./node_modules/.bin
+SAILS = ./node_modules/sails/bin/sails.js
+ifndef ENV
+ENV = development
+endif
+NODE_ENV = ENV
+ifeq ($(ENV),development)
+VERBOSE = --verbose
+else
+VERBOSE =
+endif
+
+
+define ember
+	cd $(UI) && $(BIN)/ember $(1)
+endef
+
+define sails
+	$(SAILS) $(1)
+endef
+
 
 build:
-	@cd $(UI) && \
-		$(BIN)/ember build --environment production
+	$(call ember,build --environment $(ENV))
+
 
 clean:
 	@cd $(UI) && \
 		rm -rf dist tmp
 
+
 test:
-	@cd $(UI) && \
-		$(BIN)/ember test
+	@$(call ember,test)
+
+
+#TODO: improve this so that it uses forever or such
+serve: build serve-api
 
 
 serve-ui:
-	@cd $(UI) && \
-		@$(BIN)/ember serve
+	@$(call ember,serve)
 
 serve-api:
-	@$(BIN)/sails lift
+	@$(call sails,lift $(VERBOSE))
 
 
 install:
@@ -27,6 +50,14 @@ install:
 		cd $(UI) && \
 		npm install && \
 		$(BIN)/bower install
+
+
+ember-cli:
+	@$(call ember,$(CMD))
+
+
+sails-cli:
+	@$(call sails,$(CMD))
 
 
 define release
