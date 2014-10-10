@@ -1,5 +1,25 @@
 <div class="row">
+  <table>
+    <thead>
+    <tr>
+      {{#each attributes}}
+        <th>{{name}}
+          <small>({{type}})</small>
+        </th>
+      {{/each}}
+    </tr>
+    </thead>
 
+    <tbody>
+    {{#each}}
+      <tr>
+        {{#each fields}}
+          <td>{{value}}</td>
+        {{/each}}
+      </tr>
+    {{/each}}
+    </tbody>
+  </table>
 </div>
 
 {{outlet}}
