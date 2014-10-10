@@ -1,7 +1,7 @@
 /**
- * IdentityTypeController
+ * UserController
  *
- * @description :: Server-side logic for managing IdentityTypes
+ * @description :: Server-side logic for managing Users
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 

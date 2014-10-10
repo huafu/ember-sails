@@ -24,6 +24,7 @@
         "updatedAt": "2014-10-10T03:42:49.104Z"
       }
     ],
+    "service": [],
     "user": [
       {
         "displayName": "Huafu Gandon",
@@ -81,6 +82,20 @@
         "type": "datetime"
       }
     },
+    "service": {
+      "id": {
+        "type": "integer",
+        "autoIncrement": true,
+        "primaryKey": true,
+        "unique": true
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
     "user": {
       "displayName": {
         "type": "string"
@@ -110,6 +125,7 @@
     "identitytype": {},
     "user": {
       "id": 1
-    }
+    },
+    "service": {}
   }
 }
