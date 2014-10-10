@@ -1,0 +1,115 @@
+{
+  "data": {
+    "identity": [
+      {
+        "type": "email",
+        "value": "huafu.gandon@gmail.com",
+        "owner": 1,
+        "id": 1,
+        "createdAt": "2014-10-10T03:46:37.322Z",
+        "updatedAt": "2014-10-10T03:46:37.322Z"
+      }
+    ],
+    "identitytype": [
+      {
+        "id": "email",
+        "label": "email address",
+        "createdAt": "2014-10-10T02:47:56.319Z",
+        "updatedAt": "2014-10-10T03:41:56.359Z"
+      },
+      {
+        "id": "phone:mobile",
+        "label": "mobile phone number",
+        "createdAt": "2014-10-10T03:42:49.104Z",
+        "updatedAt": "2014-10-10T03:42:49.104Z"
+      }
+    ],
+    "user": [
+      {
+        "displayName": "Huafu Gandon",
+        "isClaimed": true,
+        "id": 1,
+        "createdAt": "2014-10-10T03:45:19.895Z",
+        "updatedAt": "2014-10-10T03:45:19.895Z"
+      }
+    ]
+  },
+  "schema": {
+    "identity": {
+      "type": {
+        "type": "string",
+        "model": "identitytype",
+        "foreignKey": true,
+        "alias": "type"
+      },
+      "value": {
+        "type": "string"
+      },
+      "owner": {
+        "type": "integer",
+        "model": "user",
+        "foreignKey": true,
+        "alias": "owner"
+      },
+      "id": {
+        "type": "integer",
+        "autoIncrement": true,
+        "primaryKey": true,
+        "unique": true
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "identitytype": {
+      "id": {
+        "type": "string",
+        "size": 16,
+        "primaryKey": true,
+        "unique": true
+      },
+      "label": {
+        "type": "string"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "user": {
+      "displayName": {
+        "type": "string"
+      },
+      "isClaimed": {
+        "type": "boolean",
+        "defaultsTo": false
+      },
+      "id": {
+        "type": "integer",
+        "autoIncrement": true,
+        "primaryKey": true,
+        "unique": true
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    }
+  },
+  "counters": {
+    "identity": {
+      "id": 1
+    },
+    "identitytype": {},
+    "user": {
+      "id": 1
+    }
+  }
+}

@@ -1,0 +1,12 @@
+<div class="row">
+  <ul class="attributes">
+    {{#each attributes}}
+      {{name}} - {{type}}
+    {{/each}}
+  </ul>
+  <div>
+    {{#link-to 'admin/model/records'}}records{{/link-to}}
+  </div>
+</div>
+
+{{outlet}}

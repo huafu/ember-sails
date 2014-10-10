@@ -27,6 +27,10 @@ module.exports.models = {
    * See http://sailsjs.org/#/documentation/concepts/ORM/model-settings.html  *
    *                                                                          *
    ***************************************************************************/
-  // migrate: 'alter'
+  migrate: 'alter',
 
+  schema:        true, // forces schema
+  autoPk:        true, // uses automatic PK id by default
+  autoCreatedAt: true, // automatically adds and set createdAt
+  autoUpdatedAt: true // automatically adds and set updatedAt
 };

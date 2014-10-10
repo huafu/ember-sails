@@ -1,6 +1,7 @@
 UI = ember
 BIN = ./node_modules/.bin
-SAILS = ./node_modules/sails/bin/sails.js
+# needs use the one inside of sails else there is a circular dep error with npm
+GRUNT = ./node_modules/sails/node_modules/.bin/grunt
 ifndef ENV
 ENV = development
 endif
@@ -18,7 +19,7 @@ define ember
 endef
 
 define sails
-	$(SAILS) $(1)
+	$(BIN)/sails $(1)
 endef
 
 
@@ -33,7 +34,7 @@ clean:
 
 tests:
 	@$(call ember,test --environment $(ENV)) && \
-		$(BIN)/grunt test
+		$(GRUNT) test
 
 
 #TODO: improve this so that it uses forever or such

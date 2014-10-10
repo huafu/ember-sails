@@ -113,7 +113,11 @@
   "maxerr": 100,      // Maximum errors before stopping.
   "predef": [         // Extra globals.
     "_",
-    "sails"
+    "sails",
+
+    "Identity",
+    "IdentityType",
+    "User"
   ],
   "indent": 2         // Specify indentation spacing
 }
