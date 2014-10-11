@@ -1,5 +1,6 @@
 {
   "data": {
+    "service": [],
     "identity": [
       {
         "type": "email",
@@ -8,6 +9,14 @@
         "id": 1,
         "createdAt": "2014-10-10T03:46:37.322Z",
         "updatedAt": "2014-10-10T03:46:37.322Z"
+      },
+      {
+        "type": "phone:mobile",
+        "value": "+66830579708",
+        "owner": 1,
+        "id": 2,
+        "createdAt": "2014-10-11T03:54:13.261Z",
+        "updatedAt": "2014-10-11T03:54:13.261Z"
       }
     ],
     "identitytype": [
@@ -24,7 +33,6 @@
         "updatedAt": "2014-10-10T03:42:49.104Z"
       }
     ],
-    "service": [],
     "user": [
       {
         "displayName": "Huafu Gandon",
@@ -36,6 +44,20 @@
     ]
   },
   "schema": {
+    "service": {
+      "id": {
+        "type": "integer",
+        "autoIncrement": true,
+        "primaryKey": true,
+        "unique": true
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
     "identity": {
       "type": {
         "type": "string",
@@ -82,20 +104,6 @@
         "type": "datetime"
       }
     },
-    "service": {
-      "id": {
-        "type": "integer",
-        "autoIncrement": true,
-        "primaryKey": true,
-        "unique": true
-      },
-      "createdAt": {
-        "type": "datetime"
-      },
-      "updatedAt": {
-        "type": "datetime"
-      }
-    },
     "user": {
       "displayName": {
         "type": "string"
@@ -120,7 +128,7 @@
   },
   "counters": {
     "identity": {
-      "id": 1
+      "id": 2
     },
     "identitytype": {},
     "user": {

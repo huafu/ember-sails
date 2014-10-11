@@ -24,17 +24,21 @@ endef
 
 
 build:
-	$(call ember,build --environment $(ENV))
+	@$(call ember,build --environment $(ENV))
 
 
 clean:
-	@cd $(UI) && \
-		rm -rf dist tmp
+	@cd $(UI) && rm -rf dist tmp
 
 
 tests:
 	@$(call ember,test --environment $(ENV)) && \
 		$(GRUNT) test
+
+
+debug:
+	@$(call ember,build --environment $(ENV)) && \
+		$(call sails,debug $(PROD) $(VERBOSE))
 
 
 #TODO: improve this so that it uses forever or such
@@ -43,6 +47,7 @@ serve: build serve-api
 
 serve-ui:
 	@$(call ember,serve --environment $(ENV))
+
 
 serve-api:
 	@$(call sails,lift $(PROD) $(VERBOSE))

@@ -6,7 +6,7 @@ module.exports = {
 
   cast: function (nameOrClass) {
     if (_.isString(nameOrClass)) {
-      return sails.models[nameOrClass.toLowerCase()];
+      return _.find(sails.models, {globalId: nameOrClass});
     }
     return nameOrClass;
   }

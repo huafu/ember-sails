@@ -108,7 +108,7 @@ export default DS.RESTSerializer.extend({
 
     payload = newPayload;
 
-    console.log(payload);
+    //console.log(payload);
 
 
     // Many items (findMany, findAll)
@@ -152,5 +152,24 @@ export default DS.RESTSerializer.extend({
     }
 
     return this._super(store, type, payload, id, requestType);
+  },
+
+  serializeIntoHash: function (data, type, record, options) {
+    var keys;
+    if ((keys = Ember.keys(data)).length) {
+      this._error('Some keys are already defined on the data object, cannot inject record', keys);
+    }
+    var obj = this.serialize(record, options);
+    for (var k in obj) {
+      if (obj.hasOwnProperty(k)) {
+        data[k] = obj[k];
+      }
+    }
+  },
+
+
+  _error: function () {
+    console.error.apply(console, arguments);
+    throw new Error([].join.call(arguments, ', '));
   }
 });
