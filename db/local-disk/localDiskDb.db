@@ -31,12 +31,6 @@
         "label": "mobile phone number",
         "createdAt": "2014-10-10T03:42:49.104Z",
         "updatedAt": "2014-10-10T03:42:49.104Z"
-      },
-      {
-        "id": "facebook",
-        "label": "Facebook account",
-        "createdAt": "2014-10-11T04:20:59.432Z",
-        "updatedAt": "2014-10-11T04:20:59.432Z"
       }
     ],
     "user": [

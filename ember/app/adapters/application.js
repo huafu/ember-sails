@@ -2,8 +2,6 @@
 import DS from 'ember-data';
 import Ember from 'ember';
 
-var RSVP = Ember.RSVP;
-
 
 function newPayload(store, type, record) {
   var res = {}, extracted;
@@ -84,17 +82,55 @@ export default DS.RESTAdapter.extend({
   debug:                true,
   coalesceFindRequests: true,
 
-  CSRFToken:       '',
-  listeningModels: {},
+  CSRFToken:       null,
+  socketListeners: null,
 
   init: function () {
+    var self = this;
     this._super();
+    this.socketListeners = {};
+    ['connect', 'disconnect', 'reconnect'].forEach(function (event) {
+      this.socketAddListener(event, this._debug);
+    }, this);
     if (this.useCSRF) {
-      io.socket.get('/csrfToken', function response(tokenObject) {
-        this._debug('got new CSRF token', tokenObject);
-        this.CSRFToken = tokenObject._csrf;
-      }.bind(this));
+      io.socket.get('/csrfToken', function (tokenObject) {
+        self._debug('got new CSRF token', tokenObject);
+        self.CSRFToken = tokenObject._csrf;
+      });
     }
+  },
+
+
+  destroy: function () {
+    //Ember.keys(this.socketListeners).map(this.socketRemoveListener, this);
+    this._super();
+  },
+
+  socketAddListener: function (event, callback, metadata) {
+    var def = this.socketListeners[event];
+    if (def) {
+      this._log('[socket]', 'already listening for ' + event, def);
+      return;
+    }
+    def = this.socketListeners[event] = {data: metadata, event: event};
+    def.callback = callback.bind(this, def);
+    io.socket.addListener(event, def.callback);
+    this._debug('[socket]', 'listening for ' + event, def);
+  },
+
+  socketRemoveListener: function (event) {
+    var def = this.socketListeners[event];
+    if (!def) {
+      this._log('[socket]', 'not listening for ' + event + ' yet');
+      return;
+    }
+    delete this.socketListeners[event];
+    io.socket.removeListener(event, def.callback);
+    this._debug('[socket]', 'stop listening for ' + event, def);
+  },
+
+  socketIsListening: function (event) {
+    return !!this.socketListeners[event];
   },
 
   ajaxError: function (jqXHR) {
@@ -138,7 +174,7 @@ export default DS.RESTAdapter.extend({
     if (method !== 'get') {
       this.checkCSRF(data);
     }
-    return new RSVP.Promise(function (resolve, reject) {
+    return new Ember.RSVP.Promise(function (resolve, reject) {
       io.socket[method](url, data, function (data) {
         self._log(method, url, {request: req, response: data});
         if (self.isErrorObject(data)) {
@@ -170,6 +206,17 @@ export default DS.RESTAdapter.extend({
     });
   },
 
+  updateRecord: function (store, type, record) {
+    var serializer = store.serializerFor(type.typeKey);
+    var data = serializer.serialize(record, { includeId: true });
+    return this.ajax(
+      this.buildURL(type.typeKey, data.id, record), "PUT", data
+    ).then(
+      function (payload) {
+        return newPayload(store, type, payload);
+      }
+    );
+  },
 
   find: function (store, type/*, id, record*/) {
     return this._super.apply(arguments).then(function (payload) {
@@ -204,6 +251,17 @@ export default DS.RESTAdapter.extend({
     });
   },
 
+  deleteRecord: function (store, type, record) {
+    return this.ajax(
+      this.buildURL(type.typeKey, record.get('id'), record),
+      'DELETE',
+      {}
+    ).then(function (payload) {
+        return newPayload(store, type, payload);
+      }
+    );
+  },
+
 
   checkCSRF: function (data) {
     if (!this.useCSRF) {
@@ -218,56 +276,47 @@ export default DS.RESTAdapter.extend({
   },
 
 
+  handleSocketMessage: function (meta, message) {
+    var method = 'handleSocketRecord' + message.verb.capitalize();
+    this._debug('[socket][' + meta.event + ':' + message.verb + '] new message', message);
+    if (this[method]) {
+      Ember.run.next(this, method, meta, message);
+    }
+    else {
+      this._debug('[socket]', 'nothing to handle message with verb ' + message.verb);
+    }
+  },
+
+  handleSocketRecordCreated: function (meta, message) {
+    var type = meta.data.type,
+      store = meta.data.store,
+      record = message.data;
+    if (!record.id && message.id) {
+      record.id = message.id;
+    }
+    store.pushPayload(store, newPayload(store, type, record));
+  },
+
+  handleSocketRecordUpdated: Ember.aliasMethod('handleSocketRecordCreated'),
+
+  handleSocketRecordDestroyed: function (meta, message) {
+    var type = meta.data.type,
+      store = meta.data.store,
+      record = store.getById(type.typeKey, message.id);
+    if (record && typeof record.get('dirtyType') === 'undefined') {
+      record.unloadRecord();
+    }
+  },
+
+
   _listenToSocket: function (model) {
-    if (model in this.listeningModels) {
+    var eventName = Ember.String.camelize(model).toLowerCase();
+    if (this.socketIsListening(eventName)) {
       return;
     }
     var store = this.container.lookup('store:main');
     var type = store.modelFor(model);
-    var eventName = Ember.String.camelize(model).toLowerCase();
-
-    function pushMessage(message) {
-      var payload, record;
-      if (message.verb === 'created') {
-        record = message.data;
-      }
-      else {
-        record = message.data[type.typeKey];
-      }
-      if (!record.id && message.id) {
-        record.id = message.id;
-      }
-      payload = newPayload(store, type, record);
-      store.push(model, payload);
-    }
-
-    function destroy(message) {
-      var record = store.getById(type, message.id);
-      if (record && typeof record.get('dirtyType') === 'undefined') {
-        record.unloadRecord();
-      }
-    }
-
-
-    io.socket.on(eventName, function (message) {
-      this._debug('[socket][' + eventName + '] new message', message);
-
-      if (message.verb === 'created') {
-        // Run later to prevent creating duplicate records when calling store.createRecord
-        Ember.run.next(null, pushMessage, message);
-      }
-      if (message.verb === 'updated') {
-        pushMessage(message);
-      }
-      if (message.verb === 'destroyed') {
-        destroy(message);
-      }
-    }.bind(this));
-
-    // We add an empty property instead of using an array
-    // ao we can utilize the 'in' keyword in first test in this function.
-    this.listeningModels[model] = 0;
-    this._debug('[socket] listening to `' + eventName + '` for `' + model + '`');
+    this.socketAddListener(eventName, this.handleSocketMessage, {store: store, type: type});
   },
 
 
