@@ -1,0 +1,15 @@
+{{#if isRelationship}}
+  {{#if isArray}}
+    {{value.length}}
+    <small>record(s)</small>
+  {{else}}
+    {{#if value.recordLabel}}
+      {{value.recordLabel}}
+      <small>({{value.id}})</small>
+    {{else}}
+      {{value.id}}
+    {{/if}}
+  {{/if}}
+{{else}}
+  {{partial view.fieldPartialName}}
+{{/if}}

@@ -1,11 +1,13 @@
 import Ember from 'ember';
 
 export default Ember.ArrayController.extend({
-  needs: ['admin/model'],
+  needs: ['admin/model/model'],
 
-  itemController: 'record',
+  itemController: 'admin/model/record',
 
-  modelClass: Ember.computed.oneWay('controllers.admin/model.modelClass'),
+  modelClass: Ember.computed.oneWay('controllers.admin/model/model.modelClass'),
 
-  attributes: Ember.computed.oneWay('controllers.admin/model.attributes')
+  modelName: Ember.computed.oneWay('controllers.admin/model/model.name'),
+
+  attributes: Ember.computed.oneWay('controllers.admin/model/model.attributes')
 });

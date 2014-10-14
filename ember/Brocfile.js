@@ -22,5 +22,13 @@ app.import('vendor/js/console.js');
 
 app.import('vendor/js/sails.io.js');
 
+// foundation
+app.import('bower_components/modernizr/modernizr.js');
+app.import('bower_components/fastclick/lib/fastclick.js');
+app.import('bower_components/foundation/js/foundation.js');
+app.import('bower_components/foundation-icon-fonts/foundation-icons.eot');
+app.import('bower_components/foundation-icon-fonts/foundation-icons.woff');
+app.import('bower_components/foundation-icon-fonts/foundation-icons.svg');
+app.import('bower_components/foundation-icon-fonts/foundation-icons.ttf');
 
 module.exports = app.toTree();

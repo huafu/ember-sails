@@ -1,0 +1,9 @@
+{{#if isEditing}}
+  {{input value=value
+  action='editSave'
+  class='full-width'
+  focus-out='editCancel'
+  escape-press='editCancel'}}
+{{else}}
+  {{value}}
+{{/if}}

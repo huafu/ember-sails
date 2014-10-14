@@ -1,25 +1,20 @@
-<div class="row">
-  <table>
-    <thead>
-    <tr>
-      {{#each attributes}}
-        <th>{{name}}
-          <small>({{type}})</small>
-        </th>
-      {{/each}}
-    </tr>
-    </thead>
-
-    <tbody>
-    {{#each}}
-      <tr>
-        {{#each fields}}
-          <td>{{value}}</td>
-        {{/each}}
-      </tr>
+<h3>Records for {{modelName}}</h3>
+<table class="full-width">
+  <thead>
+  <tr>
+    {{#each attributes itemController='admin/model/model-attribute'}}
+      <th>{{key}}
+        <small>({{type}})</small>
+      </th>
     {{/each}}
-    </tbody>
-  </table>
-</div>
+  </tr>
+  </thead>
 
-{{outlet}}
+  <tbody>
+  {{#each}}
+    <tr>
+      {{each attributes itemController='admin/model/record-field' itemView='admin/model/record-field'}}
+    </tr>
+  {{/each}}
+  </tbody>
+</table>

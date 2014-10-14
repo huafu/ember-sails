@@ -8,11 +8,15 @@ export default Ember.ObjectController.extend({
   attributes: function () {
     var Model = this.get('modelClass');
     var attributes = [
-      {name: 'id', type: 'string'}
+      {name: 'id', type: 'string', parentType: Model, isAttribute: true}
     ];
 
-    Model.eachAttribute(function (name) {
-      attributes.push(Model.metaForProperty(name));
+    Model.eachAttribute(function (name, meta) {
+      attributes.push(meta);
+    });
+
+    Model.eachRelationship(function (name, rel) {
+      attributes.push(rel);
     });
 
     return attributes;
