@@ -7,10 +7,14 @@ var View = Ember.View.extend({
 
   target: Ember.computed.oneWay('controller'),
 
+  isEditable: function () {
+    return this.get('controller.isEditable') && this.get('controller.type') !== 'date';
+  }.property('controller.isEditable', 'controller.type').readOnly(),
+
   isClickable: function () {
     return this.get('controller.type') === 'boolean' ||
-      (this.get('controller.isEditable') && !this.get('controller.isEditing'));
-  }.property('controller.isEditable', 'controller.isEditing', 'controller.type').readOnly(),
+      (this.get('isEditable') && !this.get('controller.isEditing'));
+  }.property('isEditable', 'controller.isEditing', 'controller.type').readOnly(),
 
   fieldPartialName: function () {
     return 'admin/model/record-field-' + this.get('controller.type');
@@ -19,6 +23,9 @@ var View = Ember.View.extend({
   eventManager: {
     click: function (event, view) {
       if (view instanceof View) {
+        if (!view.get('isEditable')) {
+          return;
+        }
         if (view.get('controller.type') === 'boolean') {
           view.toggleProperty('controller.value');
           view.send('save');

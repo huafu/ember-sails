@@ -1,15 +1,23 @@
 /* jshint node: true */
 
-module.exports = function(environment) {
+module.exports = function (environment) {
   var ENV = {
     modulePrefix: 'ember-sails',
-    environment: environment,
-    baseURL: '/',
+    environment:  environment,
+    baseURL:      '/',
     locationType: 'auto',
-    EmberENV: {
+    EmberENV:     {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build
         // e.g. 'with-controller': true
+      }
+    },
+
+    defaults: {
+      date: {
+        invalidFormat: '-',
+        nullFormat:    '-',
+        format:        'lll'
       }
     },
 

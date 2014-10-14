@@ -25,6 +25,7 @@ app.import('vendor/js/sails.io.js');
 // foundation
 app.import('bower_components/modernizr/modernizr.js');
 app.import('bower_components/fastclick/lib/fastclick.js');
+app.import('bower_components/momentjs/moment.js');
 app.import('bower_components/foundation/js/foundation.js');
 app.import('bower_components/foundation-icon-fonts/foundation-icons.eot');
 app.import('bower_components/foundation-icon-fonts/foundation-icons.woff');
