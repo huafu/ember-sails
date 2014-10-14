@@ -3,13 +3,21 @@
     {{value.length}}
     <small>record(s)</small>
   {{else}}
-    {{#if value.recordLabel}}
-      {{value.recordLabel}}
-      <small>({{value.id}})</small>
-    {{else}}
-      {{value.id}}
-    {{/if}}
+    <button class="button tiny full-width" {{action 'gotoRecord' type value.id bubbles=false}}>
+      {{#if value.recordLabel}}
+        {{value.recordLabel}}
+        <small>({{value.id}})</small>
+      {{else}}
+        {{value.id}}
+      {{/if}}
+    </button>
   {{/if}}
 {{else}}
-  {{partial view.fieldPartialName}}
+  {{#if isPrimaryKey}}
+    <button class="button tiny full-width" {{action 'gotoRecord' value bubbles=false}}>
+      {{value}}
+    </button>
+  {{else}}
+    {{partial view.fieldPartialName}}
+  {{/if}}
 {{/if}}

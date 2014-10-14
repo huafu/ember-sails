@@ -32,6 +32,9 @@ var View = Ember.View.extend({
         }
         else {
           view.send('editBegin');
+          Ember.run.schedule('afterRender', function () {
+            view.$('input').focus();
+          });
         }
       }
     }

@@ -13,6 +13,9 @@ Router.map(function () {
         this.route('index', {path: '/'});
         this.resource('admin.model.records', {path: 'records'}, function () {
           this.route('index', {path: '/'});
+          this.resource('admin.model.record', {path: ':id'}, function () {
+            this.route('index', {path: '/'});
+          });
         });
       });
     });

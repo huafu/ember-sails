@@ -1,6 +1,8 @@
 
 div.admin {
-  td > input {
-    margin: 0;
+  td {
+    > input, > button {
+      margin: 0;
+    }
   }
 }

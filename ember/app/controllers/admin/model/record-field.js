@@ -11,8 +11,8 @@ export default ModelAttributeController.extend({
   isSaving: Ember.computed.oneWay('record.isSaving'),
 
   isEditable: function () {
-    return this.get('key') !== 'id' && !this.get('isRelationship');
-  }.property('key', 'isRelationship').readOnly(),
+    return !this.get('isPrimaryKey') && !this.get('isRelationship');
+  }.property('isPrimaryKey', 'isRelationship').readOnly(),
 
   value: function (key, value/*, oldValue*/) {
     var isRel = this.get('isRelationship'),
