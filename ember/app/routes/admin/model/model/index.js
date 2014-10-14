@@ -1,7 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
-  renderTemplate: function () {
-    this.render({outlet: 'model'});
+  redirect: function(){
+    this.transitionTo('admin.model.records');
   }
 });
