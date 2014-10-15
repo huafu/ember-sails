@@ -1,0 +1,18 @@
+{{#f-button dropdownId=view.uniqueId class='small full-width' hover=true align-dropdown='left'}}
+  {{#if value.recordLabel}}
+    {{value.recordLabel}}
+  {{else}}
+    {{value.id}}
+  {{/if}}
+{{/f-button}}
+{{#f-dropdown id=view.uniqueId content=true tagName='ul'}}
+  {{#each choices}}
+    <li class="clickable no-wrap" {{action 'setAndSave' this}}>
+      {{#if recordLabel}}
+        {{recordLabel}}
+      {{else}}
+        {{id}}
+      {{/if}}
+    </li>
+  {{/each}}
+{{/f-dropdown}}

@@ -7,6 +7,14 @@ var View = Ember.View.extend({
 
   target: Ember.computed.oneWay('controller'),
 
+  uniqueId: function () {
+    var k = this.get('controller.key');
+    if (!View.uuidSequences[k]) {
+      View.uuidSequences[k] = 0;
+    }
+    return 'generated-id-record-field-' + k + '-' + (++View.uuidSequences[k]);
+  }.property('controller.key'),
+
   isEditable: function () {
     return this.get('controller.isEditable') && this.get('controller.type') !== 'date';
   }.property('controller.isEditable', 'controller.type').readOnly(),
@@ -17,28 +25,32 @@ var View = Ember.View.extend({
   }.property('isEditable', 'controller.isEditing', 'controller.type').readOnly(),
 
   fieldPartialName: function () {
-    return 'admin/model/record-field-' + this.get('controller.type');
-  }.property('controller.type').readOnly(),
+    var suffix = this.get('controller.isRelationship') ?
+      this.get('controller.relationshipKind') : this.get('controller.type');
+    return 'admin/model/record-field-' + suffix.dasherize();
+  }.property(
+    'controller.type', 'controller.isRelationship', 'controller.relationshipKind'
+  ).readOnly(),
 
-  eventManager: {
-    click: function (event, view) {
-      if (view instanceof View) {
-        if (!view.get('isEditable')) {
-          return;
-        }
-        if (view.get('controller.type') === 'boolean') {
-          view.toggleProperty('controller.value');
-          view.send('save');
-        }
-        else {
-          view.send('editBegin');
-          Ember.run.schedule('afterRender', function () {
-            view.$('input').focus();
-          });
-        }
-      }
+  click: function () {
+    if (!this.get('isEditable') || this.get('controller.isRelationship')) {
+      return;
+    }
+    if (this.get('controller.type') === 'boolean') {
+      this.toggleProperty('controller.value');
+      this.send('save');
+    }
+    else {
+      this.send('editBegin');
+      Ember.run.schedule('afterRender', this, function () {
+        this.$('input').focus();
+      });
     }
   }
+});
+
+View.reopenClass({
+  uuidSequences: {}
 });
 
 export default View;

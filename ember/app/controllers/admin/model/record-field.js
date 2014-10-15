@@ -10,17 +10,12 @@ export default ModelAttributeController.extend({
 
   isSaving: Ember.computed.oneWay('record.isSaving'),
 
-  isEditable: function () {
-    return !this.get('isPrimaryKey') && !this.get('isRelationship');
-  }.property('isPrimaryKey', 'isRelationship').readOnly(),
-
   value: function (key, value/*, oldValue*/) {
-    var isRel = this.get('isRelationship'),
-      prop = 'record.' + this.get('key'),
+    var prop = 'record.' + this.get('key'),
       val;
     if (arguments.length >= 2) {
       // set
-      if (prop === 'id' || (isRel && this.get('isArray'))) {
+      if (!this.get('isEditable')) {
         throw new Ember.Error('read-only attribute `%@`'.fmt(prop));
       }
       val = value;
@@ -32,17 +27,7 @@ export default ModelAttributeController.extend({
       val = this.get(prop);
     }
     return val;
-  }.property('key', 'isRelationship', 'isArray'),
-
-  type: function () {
-    return this.get('isRelationship') ? this.get('model.type.typeKey') : this.get('model.type');
-  }.property('model.type', 'isRelationship').readOnly(),
-
-  isArray: function () {
-    return this.get('model.kind') === 'hasMany';
-  }.property('model.kind').readOnly(),
-
-  isRelationship: Ember.computed.bool('model.isRelationship'),
+  }.property('key'),
 
 
   _notifyValueChanged: function () {
@@ -81,10 +66,12 @@ export default ModelAttributeController.extend({
     },
 
     save: function () {
-      var record = this.get('record');
-      if (record && record.get('isDirty')) {
-        record.save();
-      }
+      this.get('record').save();
+    },
+
+    setAndSave: function (value) {
+      this.set('value', value);
+      this.send('save');
     },
 
     editBegin: function () {
