@@ -1,9 +1,7 @@
 
 div.admin {
-  td {
-    > input,
-    > button,
-    > .button {
+  td[data-field-type] {
+    input, button, select, .button {
       margin: 0;
     }
   }

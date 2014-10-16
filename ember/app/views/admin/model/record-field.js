@@ -3,9 +3,14 @@ import Ember from 'ember';
 var View = Ember.View.extend({
   tagName:           'td',
   classNameBindings: ['isClickable:clickable'],
+  attributeBindings: ['fieldType:data-field-type'],
   templateName:      'admin/model/record-field',
 
   target: Ember.computed.oneWay('controller'),
+
+  fieldType: function () {
+    return this.get('controller.type').dasherize();
+  }.property('controller.type').readOnly(),
 
   uniqueId: function () {
     var k = this.get('controller.key');
@@ -15,9 +20,7 @@ var View = Ember.View.extend({
     return 'generated-id-record-field-' + k + '-' + (++View.uuidSequences[k]);
   }.property('controller.key'),
 
-  isEditable: function () {
-    return this.get('controller.isEditable') && this.get('controller.type') !== 'date';
-  }.property('controller.isEditable', 'controller.type').readOnly(),
+  isEditable: Ember.computed.oneWay('controller.isEditable'),
 
   isClickable: function () {
     return this.get('controller.type') === 'boolean' ||
@@ -33,7 +36,7 @@ var View = Ember.View.extend({
   ).readOnly(),
 
   click: function () {
-    if (!this.get('isEditable') || this.get('controller.isRelationship')) {
+    if (!this.get('isEditable')) {
       return;
     }
     if (this.get('controller.type') === 'boolean') {
@@ -43,7 +46,7 @@ var View = Ember.View.extend({
     else {
       this.send('editBegin');
       Ember.run.schedule('afterRender', this, function () {
-        this.$('input').focus();
+        this.$('input,select').focus();
       });
     }
   }

@@ -1,9 +1,8 @@
 {{#if isEditing}}
   {{input type='datetime'
-  value=value action='editSave'
-  class='full-width'
+  value=dateTimeValue action='editSave'
   focus-out='editCancel'
   escape-press='editCancel'}}
 {{else}}
-  {{fmt-date value}}
+  {{fmt-date value format='YYYY-MM-DD HH:mm'}}
 {{/if}}

@@ -28,17 +28,16 @@ export default Ember.ObjectController.extend({
       (!this.get('isRelationship') || this.get('relationshipKind') === 'belongsTo');
   }.property('isPrimaryKey', 'isRelationship', 'relationshipKind').readOnly(),
 
-  _choices: null,
-  choices:  function () {
-    var all, type;
-    if (!this.get('_choices')) {
+  choices: function () {
+    var type;
+    if (!this._choices) {
+      this._choices = this.container.lookup('controller:admin/model/base/records', {singleton: false});
       type = this.get('type');
-      all = this.store.all(type);
-      if (all.get('length') === 0) {
-        Ember.run.debounce(this.store, 'findAll', type, 100);
+      this._choices.set('model', this.store.all(type));
+      if (this._choices.get('length') === 0) {
+        Ember.run.debounce(this.store, 'find', type, 100);
       }
-      this.set('_choices', all.sortBy('recordLabel'));
     }
-    return this.get('_choices');
-  }.property('isRelationship', 'relationshipKind', '_choices').readOnly()
+    return this._choices;
+  }.property('isRelationship', 'relationshipKind').readOnly()
 });
