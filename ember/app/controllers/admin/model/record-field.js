@@ -1,6 +1,5 @@
 import Ember from 'ember';
 import ModelAttributeController from './model-attribute';
-import BaseRecordController from './base/record';
 
 export default ModelAttributeController.extend({
   record: Ember.computed.oneWay('parentController.model'),

@@ -1,19 +1,10 @@
 {{#if isEditing}}
-  <div class="row collapse">
-    <div class="small-10 columns">
-      {{view Ember.Select
-      content=choices
-      optionValuePath="content.id"
-      optionLabelPath="content.label"
-      selection=selected
-      prompt='-- N/A --'}}
-    </div>
-    <div class="small-2 columns">
-      <button class="tiny" {{action 'editSave' bubbles=false}}>
-        <i class="fi-save"></i>
-      </button>
-    </div>
-  </div>
+  {{view Ember.Select
+  content=choices
+  optionValuePath="content.id"
+  optionLabelPath="content.label"
+  selection=selected
+  prompt='-- N/A --'}}
 {{else}}
   {{#if value.recordLabel}}
     {{value.recordLabel}}

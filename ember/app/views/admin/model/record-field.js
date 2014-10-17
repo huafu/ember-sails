@@ -47,6 +47,7 @@ var View = Ember.View.extend({
       this.send('editBegin');
       Ember.run.schedule('afterRender', this, function () {
         this.$('input,select').focus();
+        this.$('select').blur(Ember.run.bind(this, 'send', 'editSave'));
       });
     }
   }
