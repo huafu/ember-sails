@@ -1,7 +1,7 @@
 /**
- * IdentityTypeController
+ * AuthController
  *
- * @description :: Server-side logic for managing IdentityTypes
+ * @description :: Server-side logic for managing Auths
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 

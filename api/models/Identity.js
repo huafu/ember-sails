@@ -10,16 +10,22 @@ module.exports = {
   attributes: {
 
     type: {
-      model: 'identityType'
+      model:    'identityType',
+      required: true
+    },
+
+    owner: {
+      model:    'user',
+      required: true
+    },
+
+    lastLocation: {
+      model: 'geoLocation'
     },
 
     value: {
       type:     'string',
       required: true
-    },
-
-    owner: {
-      model: 'user'
     }
 
   }

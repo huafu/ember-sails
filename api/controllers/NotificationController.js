@@ -1,7 +1,7 @@
 /**
- * IdentityTypeController
+ * NotificationController
  *
- * @description :: Server-side logic for managing IdentityTypes
+ * @description :: Server-side logic for managing Notifications
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 

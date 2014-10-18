@@ -1,7 +1,7 @@
-import SailsSocketAdapter from 'ember-data-sails/adapters/sails-socket';
+import SailsRESTAdapter from 'ember-data-sails/adapters/sails-rest';
 
 
-export default SailsSocketAdapter.extend({
+export default SailsRESTAdapter.extend({
   /**
    * @inheritDoc
    */

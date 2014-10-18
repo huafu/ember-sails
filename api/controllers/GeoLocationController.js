@@ -1,7 +1,7 @@
 /**
- * IdentityTypeController
+ * GeoLocationController
  *
- * @description :: Server-side logic for managing IdentityTypes
+ * @description :: Server-side logic for managing GeoLocations
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 

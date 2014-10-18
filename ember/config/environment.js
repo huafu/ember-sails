@@ -22,6 +22,7 @@ module.exports = function (environment) {
     },
 
     APP: {
+      name: 'Ember-Sails',
       // Here you can pass flags/options to your application instance
       // when it is created
       SAILS_LOG_LEVEL: 'debug'

@@ -17,8 +17,6 @@ var app = new EmberApp();
 // please specify an object with the list of modules as keys
 // along with the exports of each module as its value.
 
-// TODO: import this one only in development mode?
-app.import('vendor/js/console.js');
 
 app.import('vendor/js/sails.io.js');
 
