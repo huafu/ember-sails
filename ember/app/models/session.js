@@ -1,4 +1,5 @@
 import DS from 'ember-data';
+import Ember from 'ember';
 
 export default DS.Model.extend({
   owner: DS.belongsTo('user'),
@@ -11,5 +12,7 @@ export default DS.Model.extend({
 
   createdAt: DS.attr('date'),
 
-  updatedAt: DS.attr('date')
+  updatedAt: DS.attr('date'),
+
+  isAuthenticated: Ember.computed.bool('initiator')
 });

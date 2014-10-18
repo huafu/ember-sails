@@ -23,6 +23,10 @@ module.exports = {
       model: 'geoLocation'
     },
 
+    displayName: {
+      type: 'string'
+    },
+
     value: {
       type:     'string',
       required: true

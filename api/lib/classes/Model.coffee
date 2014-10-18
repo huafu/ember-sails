@@ -18,8 +18,8 @@ export default {{source}};
 '''
 
 class Model
-  name: null
-  config: null
+  name:            null
+  config:          null
   attributesCache: null
 
 
@@ -35,11 +35,11 @@ class Model
     if @attributesCache.hasOwnProperty(name)
       attr = @attributesCache[name]
     else
-      if (def = @config.attributes[name])
+      if (def = @config.attributes[name]) and typeof def is 'object'
         attr = new ModelAttribute(name, def)
-      else
+      else if not def
         if (name is 'createdAt' and modelsConfig.autoCreatedAt) or
-        (name is 'updatedAt' and modelsConfig.autoUpdatedAt)
+          (name is 'updatedAt' and modelsConfig.autoUpdatedAt)
           attr = new ModelAttribute(name, {type: 'datetime', required: yes})
         else if name is 'id' and (@config.autoPk ? modelsConfig.autoPk)
           attr = new ModelAttribute(name, {primaryKey: yes, required: yes})
@@ -57,7 +57,7 @@ class Model
     res = []
     autoPk = @config.autoPk ? modelsConfig.autoPk
     res.push('id') if autoPk
-    res = res.concat(Object.keys @config.attributes)
+    res = res.concat(key for key, val in @config.attributes when typeof val is 'object')
     res.push('createdAt') if modelsConfig.autoCreatedAt
     res.push('updatedAt') if modelsConfig.autoUpdatedAt
     res
