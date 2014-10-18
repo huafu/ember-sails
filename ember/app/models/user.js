@@ -3,8 +3,14 @@ import Ember from 'ember';
 
 export default DS.Model.extend({
   displayName: DS.attr('string'),
-  isClaimed:   DS.attr('boolean'),
-  identities:  DS.hasMany('identity', {inverse: 'owner'}),
+
+  isClaimed: DS.attr('boolean', {defaultValue: false}),
+
+  identities: DS.hasMany('identity', {inverse: 'owner'}),
+
+  createdAt: DS.attr('date'),
+
+  updatedAt: DS.attr('date'),
 
   firstName: function (key, value) {
     var str;
@@ -30,9 +36,5 @@ export default DS.Model.extend({
     return    this.get('displayName').split(' ').slice(1).join(' ');
   }.property('displayName'),
 
-  createdAt: DS.attr('date'),
-  updatedAt: DS.attr('date'),
-
   recordLabel: Ember.computed.alias('displayName')
-})
-  ;
+});
