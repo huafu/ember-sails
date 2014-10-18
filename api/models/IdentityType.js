@@ -6,7 +6,6 @@
  */
 
 module.exports = {
-  autoPk: false,
 
   attributes: {
     code:  {
