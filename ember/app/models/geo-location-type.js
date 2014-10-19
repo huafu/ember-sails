@@ -2,8 +2,6 @@ import DS from 'ember-data';
 import Ember from 'ember';
 
 export default DS.Model.extend({
-  code: DS.attr('string'),
-
   label: DS.attr('string'),
 
   level: DS.attr('number', {defaultValue: 0}),

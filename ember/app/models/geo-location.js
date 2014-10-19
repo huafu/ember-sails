@@ -15,5 +15,11 @@ export default DS.Model.extend({
 
   createdAt: DS.attr('date'),
 
-  updatedAt: DS.attr('date')
+  updatedAt: DS.attr('date'),
+
+  recordLabel: function () {
+    return '%@,%@ (%@, source: %@)'.fmt(
+      this.get('lat'), this.get('lng'), this.get('type.id'), this.get('source.id')
+    );
+  }.computed('lat', 'lng', 'type', 'source').readOnly()
 });

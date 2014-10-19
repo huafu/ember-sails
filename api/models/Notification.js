@@ -9,12 +9,12 @@ module.exports = {
 
   attributes: {
     recipient: {
-      model:    'Identity',
+      model:    'Passport',
       required: true
     },
 
     sender: {
-      model:    'Identity',
+      model:    'Passport',
       required: true
     },
 

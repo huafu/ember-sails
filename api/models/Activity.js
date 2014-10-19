@@ -8,7 +8,7 @@
 module.exports = {
   attributes: {
     type:  { model: 'ActivityType', required: true },
-    actor: { model: 'Identity', required: true },
+    actor: { model: 'Passport', required: true },
 
     subjectType: { type: 'string' },
     subjectId:   { type: 'string' },
