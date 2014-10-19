@@ -1,8 +1,8 @@
 class ModelAttribute
-  name: null
+  name:   null
   config: null
 
-  constructor: (@name, @config) ->
+  constructor:  (@name, @config) ->
 
   isPrimaryKey: ->
     @config.primaryKey
@@ -19,7 +19,10 @@ class ModelAttribute
     @config.defaultsTo
 
   getRelationshipModelName: ->
-    @config.model or @config.collection
+    if (name = @config.model ? @config.collection)
+      require('./Model').baseName(name)
+    else
+      undefined
 
   getRelationshipKind: ->
     if @isRelationship()
@@ -31,7 +34,9 @@ class ModelAttribute
     @config.via
 
   toEmberDefinition: ->
-    if @isAttribute()
+    if @config.protected
+      undefined
+    else if @isAttribute()
       attr = ["'#{ Class.waterlineTypeToEmberType(@config.type) or 'string' }'"]
       if (def = @getDefaultValue()) isnt undefined
         attr.push "{defaultValue: #{ JSON.stringify def }}"
@@ -47,8 +52,9 @@ class ModelAttribute
   @waterlineTypeToEmberType: (type) ->
     {
     datetime: 'date'
-    integer: 'number'
-    float: 'number'
+    integer:  'number'
+    float:    'number'
+    email:    'string'
     }[type] ? type
 
 Class = module.exports = ModelAttribute

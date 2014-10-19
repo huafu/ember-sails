@@ -6,13 +6,14 @@
  */
 
 module.exports = {
+  autoPk: false,
 
   attributes: {
-    code: {
-      type:     'string',
-      size:     32,
-      required: true,
-      unique:   true
+    id: {
+      type:       'string',
+      size:       32,
+      required:   true,
+      primaryKey: true
     },
 
     label: {

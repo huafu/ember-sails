@@ -6,44 +6,18 @@
  */
 
 module.exports = {
-
   attributes: {
-    type: {
-      model:    'activityType',
-      required: true
-    },
+    type:  { model: 'ActivityType', required: true },
+    actor: { model: 'Identity', required: true },
 
-    actor: {
-      model:    'identity',
-      required: true
-    },
+    subjectType: { type: 'string' },
+    subjectId:   { type: 'string' },
 
-    subjectType: {
-      type: 'string'
-    },
+    location: { model: 'GeoLocation' },
+    data:     { type: 'json' },
 
-    subjectId: {
-      type: 'string'
-    },
-
-    location: {
-      model: 'geoLocation'
-    },
-
-    data: {
-      type: 'json'
-    },
-
-    isDeleted: {
-      type:       'boolean',
-      required:   true,
-      defaultsTo: false
-    },
-
-    notifications: {
-      collection: 'notification',
-      via:        'activity'
-    }
+    isDeleted:     { type: 'boolean', required: true, defaultsTo: false },
+    notifications: { collection: 'Notification', via: 'activity' }
   }
 };
 

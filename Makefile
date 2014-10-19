@@ -99,3 +99,9 @@ release-major: test build
 
 publish: test build
 	@git push --tags origin HEAD:master
+
+
+
+ember-update-models:
+	@$(BIN)/coffee -e \
+		"model.writeEmberModelFile() for model in require('./api/lib/classes/Model').all()"

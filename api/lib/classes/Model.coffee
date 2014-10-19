@@ -35,11 +35,13 @@ class Model
     if @attributesCache.hasOwnProperty(name)
       attr = @attributesCache[name]
     else
-      if (def = @config.attributes[name]) and typeof def is 'object'
+      if (def = @config.attributes[name]) and typeof def isnt 'function'
+        if typeof def is 'string'
+          def = type: def
         attr = new ModelAttribute(name, def)
       else if not def
         if (name is 'createdAt' and modelsConfig.autoCreatedAt) or
-          (name is 'updatedAt' and modelsConfig.autoUpdatedAt)
+        (name is 'updatedAt' and modelsConfig.autoUpdatedAt)
           attr = new ModelAttribute(name, {type: 'datetime', required: yes})
         else if name is 'id' and (@config.autoPk ? modelsConfig.autoPk)
           attr = new ModelAttribute(name, {primaryKey: yes, required: yes})
@@ -57,7 +59,7 @@ class Model
     res = []
     autoPk = @config.autoPk ? modelsConfig.autoPk
     res.push('id') if autoPk
-    res = res.concat(key for key, val in @config.attributes when typeof val is 'object')
+    res = res.concat(key for key, val of @config.attributes when typeof val isnt 'function')
     res.push('createdAt') if modelsConfig.autoCreatedAt
     res.push('updatedAt') if modelsConfig.autoUpdatedAt
     res
@@ -82,7 +84,8 @@ class Model
     exists = fs.existsSync file
     if not override and exists
       fs.writeFileSync "#{ file }.orig", fs.readFileSync(file)
-      console.info "backing up `#{ @getName() }` into `#{ file }.orig`"
+      console.log "  backing up `#{ @getName() }` into `#{ file }.orig`"
+    console.info "* writing Ember model source for `#{ @getName() }` into `#{ file }`"
     fs.writeFileSync file, str.interpolate(EMBER_TEMPLATE, source: @toEmberDefinition())
 
   # ---- static methods ----
@@ -96,7 +99,10 @@ class Model
       model = @dict[name]
     else
       source = @nameToFilePath name
-      try def = require source
+      try
+        def = require source
+      catch err
+        console.warn "error reading file for model `#{ name }`", err
       if def
         model = new Class(name, def)
       else

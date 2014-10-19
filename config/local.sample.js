@@ -82,12 +82,19 @@ module.exports = {
 
   // environment: process.env.NODE_ENV || 'development'
 
-  models: {
+  models:   {
     connection: 'localDiskDb',
     migrate:    'alter'
   },
-  log:    {
+  log:      {
     level: 'silly'
+  },
+  // development passports
+  passport: {
+    facebook: {
+      clientID:     'xxxxxxxx',
+      clientSecret: 'yyyyyyyy'
+    }
   }
 
 };

@@ -24,12 +24,12 @@ module.exports = {
     },
 
     type: {
-      model:    'geoLocationType',
+      model:    'GeoLocationType',
       required: true
     },
 
     source: {
-      model:    'geoLocationSource',
+      model:    'GeoLocationSource',
       required: true
     },
 

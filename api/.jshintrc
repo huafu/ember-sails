@@ -1,0 +1,15 @@
+{
+  "node":   true,
+  "globals": [
+    "_",
+    "sails",
+
+    //services
+    "passport",
+
+    //models
+    "Passport",
+    "PassportType",
+    "User"
+  ]
+}

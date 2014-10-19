@@ -9,17 +9,17 @@ module.exports = {
 
   attributes: {
     recipient: {
-      model:    'identity',
+      model:    'Identity',
       required: true
     },
 
     sender: {
-      model:    'identity',
+      model:    'Identity',
       required: true
     },
 
     activity: {
-      model: 'activity'
+      model: 'Activity'
     },
 
     isRead: {

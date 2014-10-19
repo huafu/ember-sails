@@ -1,7 +1,7 @@
 /**
- * IdentityController
+ * PassportController
  *
- * @description :: Server-side logic for managing Identities
+ * @description :: Server-side logic for managing Passports
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 

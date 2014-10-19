@@ -1,0 +1,42 @@
+str = require './string'
+
+modelConstructorCache =
+  _index: null
+  index: ->
+    unless (@_index)
+      @_index = constructors: [], models: []
+      for own name, model of sails.models
+        @_index.constructors.push model._model.__bindData__[0]
+        @_index.models.push model
+    @_index
+  modelForConstructor: (constructor) ->
+    idx = @index()
+    if (i = idx.constructors.indexOf(constructor) >= 0)
+      idx.models[i]
+    else
+      undefined
+
+
+self = module.exports =
+  forName: (name) ->
+    sails.models[name.replace(/[_\.-]/g, '').toLowerCase()]
+
+  forRecord: (record) ->
+    modelConstructorCache.modelForConstructor(record.constructor)
+
+  for: (item) ->
+    if _.isString(item)
+      self.forName(item)
+    else if item.prototype
+      self.forRecord(item)
+    else if (name = item?.identity)
+      self.forName(name)
+    else
+      throw new ReferenceError('cannot get the model for ' + item)
+
+  nameFor: (item) ->
+    self.for(item).globalId
+
+  primaryKeyNameFor: (item) ->
+    self.for(item).primaryKey
+

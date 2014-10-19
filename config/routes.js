@@ -24,17 +24,17 @@ module.exports.routes = {
 
   /***************************************************************************
    *                                                                          *
-   * Make the view located at `views/homepage.ejs` (or `views/homepage.jade`, *
-   * etc. depending on your default view engine) your home page.              *
-   *                                                                          *
-   * (Alternatively, remove this and add an `index.html` file in your         *
-   * `assets` directory)                                                      *
+   * Authentication                                                           *
    *                                                                          *
    ***************************************************************************/
+  'get /login':                   'AuthController.login',
+  'get /logout':                  'AuthController.logout',
+  'post /auth/local':             'AuthController.callback',
+  'post /auth/local/:action':     'AuthController.callback',
+  'get /auth/:provider':          'AuthController.provider',
+  'get /auth/:provider/callback': 'AuthController.callback',
+  'get /auth/:provider/:action':  'AuthController.callback',
 
-  // '/': {
-  //   view: 'homepage'
-  // }
 
   /***************************************************************************
    *                                                                          *

@@ -1,4 +1,4 @@
-string = module.exports =
+self = module.exports =
 
   dasherize: (str, dash = '-') ->
     str.replace /[A-Z]+/g, (char) -> dash + char.toLowerCase()
@@ -15,7 +15,7 @@ string = module.exports =
 
 
   classify: (str) ->
-    string.capitalize string.camelize(str)
+    self.capitalize self.camelize(str)
 
 
   decapitalize: (str) ->
@@ -46,6 +46,6 @@ string = module.exports =
 
 
   humanize: (str) ->
-    string.decapitalize string.dasherize(
-      string.trim(str, '\\s_\\.\\-')
+    self.decapitalize self.dasherize(
+      self.trim(str, '\\s_\\.\\-')
     ).replace(/[^a-z0-9]+/gi, ' ')

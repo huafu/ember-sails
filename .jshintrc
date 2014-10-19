@@ -111,13 +111,8 @@
   // [4]: http://www.jshint.com/options/
 
   "maxerr": 100,      // Maximum errors before stopping.
-  "predef": [         // Extra globals.
-    "_",
-    "sails",
+  "globals": [         // Extra globals.
 
-    "Identity",
-    "IdentityType",
-    "User"
   ],
   "indent": 2         // Specify indentation spacing
 }
