@@ -3,7 +3,7 @@ import DS from 'ember-data';
 export default DS.Model.extend({
   type: DS.belongsTo('activityType'),
 
-  actor: DS.belongsTo('identity'),
+  actor: DS.belongsTo('passport'),
 
   subjectType: DS.attr('string'),
 

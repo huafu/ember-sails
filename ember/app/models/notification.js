@@ -1,9 +1,9 @@
 import DS from 'ember-data';
 
 export default DS.Model.extend({
-  recipient: DS.belongsTo('identity'),
+  recipient: DS.belongsTo('passport'),
 
-  sender: DS.belongsTo('identity'),
+  sender: DS.belongsTo('passport'),
 
   activity: DS.belongsTo('activity'),
 

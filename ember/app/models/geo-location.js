@@ -21,5 +21,5 @@ export default DS.Model.extend({
     return '%@,%@ (%@, source: %@)'.fmt(
       this.get('lat'), this.get('lng'), this.get('type.id'), this.get('source.id')
     );
-  }.computed('lat', 'lng', 'type', 'source').readOnly()
+  }.property('lat', 'lng', 'type', 'source').readOnly()
 });

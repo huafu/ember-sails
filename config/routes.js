@@ -46,5 +46,9 @@ module.exports.routes = {
    *                                                                          *
    ***************************************************************************/
 
-  "/*": {view: "index", skipAssets: true, skipRegex: /\/(api\/|csrfToken)/}
+  "/*": {
+    controller: 'IndexController',
+    action:     'index',
+    skipAssets: true,
+    skipRegex:  /\/(api\/|csrfToken)/}
 };
