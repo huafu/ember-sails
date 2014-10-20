@@ -120,3 +120,4 @@ nbproject
 /coverage
 *.bak
 *.orig
+db/geoip/*

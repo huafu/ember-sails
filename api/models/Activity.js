@@ -14,7 +14,7 @@ module.exports = {
     subjectId:   { type: 'string' },
 
     location: { model: 'GeoLocation' },
-    data:     { type: 'json' },
+    extra:    { type: 'json' },
 
     isDeleted:     { type: 'boolean', required: true, defaultsTo: false },
     notifications: { collection: 'Notification', via: 'activity' }

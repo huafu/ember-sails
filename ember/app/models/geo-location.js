@@ -11,7 +11,7 @@ export default DS.Model.extend({
 
   source: DS.belongsTo('geoLocationSource'),
 
-  data: DS.attr('json'),
+  extra: DS.attr('json'),
 
   createdAt: DS.attr('date'),
 

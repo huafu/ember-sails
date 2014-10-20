@@ -11,7 +11,7 @@ export default DS.Model.extend({
 
   location: DS.belongsTo('geoLocation'),
 
-  data: DS.attr('json'),
+  extra: DS.attr('json'),
 
   isDeleted: DS.attr('boolean', {defaultValue: false}),
 

@@ -8,9 +8,10 @@ export default Ember.Object.extend({
   user: null,
 
   init: function () {
-    var user, adapter, store, model;
+    var user, adapter, store, model,
+      $meta = Ember.$('meta[name="session-user"]');
     this._super();
-    if ((user = Ember.$('meta[name="session-user"]').attr('content')) && (user = JSON.parse(user)) && user.id) {
+    if ((user = $meta.attr('content')) && (user = JSON.parse(user)) && user.id) {
       store = this.container.lookup('store:main');
       model = this.container.lookup('model:user');
       adapter = store.adapterFor(model);
@@ -20,5 +21,6 @@ export default Ember.Object.extend({
     else {
       this.set('user', null);
     }
+    $meta.remove();
   }
 });

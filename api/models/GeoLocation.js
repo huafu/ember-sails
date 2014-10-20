@@ -33,7 +33,7 @@ module.exports = {
       required: true
     },
 
-    data: {
+    extra: {
       type: 'json'
     }
   }
