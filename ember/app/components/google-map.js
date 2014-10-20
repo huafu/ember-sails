@@ -9,6 +9,224 @@ function hasGoogleLib() {
   return _hasGoogleLib;
 }
 
+function makeObj() {
+  var res = {};
+  for (var i = 0; i < arguments.length; i += 2) {
+    res[arguments[i]] = arguments[i + 1];
+  }
+  return res;
+}
+
+var helpers = {
+  TYPE_ROAD:      'road',
+  TYPE_TERRAIN:   'terrain',
+  TYPE_HYBRID:    'hybrid',
+  TYPE_SATELLITE: 'satellite',
+
+  _typeMap:             {
+    road:      'ROADMAP',
+    terrain:   'TERRAIN',
+    hybrid:    'HYBRID',
+    satellite: 'SATELLITE'
+  },
+  /**
+   * Convert our type to the google one
+   * @param {String} type
+   * @returns {String}
+   */
+  typeToGoogleType:     function (type) {
+    var name;
+    if (hasGoogleLib() && (name = helpers._typeMap[type])) {
+      return google.maps.MapTypeId[name];
+    }
+  },
+  /**
+   * Convert google map type to our type
+   * @param {String} type
+   * @returns {string}
+   */
+  typeFromGoogleType:   function (type) {
+    if (hasGoogleLib() && type) {
+      for (var k in helpers._typeMap) {
+        if (helpers._typeMap.hasOwnProperty(k) && google.maps.MapTypeId[helpers._typeMap[k]] === type) {
+          return k;
+        }
+      }
+    }
+  },
+  /**
+   * Convert a lat/lng pair to a google one
+   * @param {Number} lat
+   * @param {Number} lng
+   * @returns {google.maps.LatLng}
+   */
+  latLngToGoogleLatLng: function (lat, lng) {
+    if (lat != null && lng != null && hasGoogleLib()) {
+      return new google.maps.LatLng(Number(lat), Number(lng));
+    }
+  },
+  /**
+   * Convert a google LatLng object to lat/lng
+   * @param {google.maps.LatLng} obj
+   * @returns {Array<Number>}
+   */
+  googleLatLngToLatLng: function (obj) {
+    return [obj.lat(), obj.lng()];
+  },
+
+  _typeFromGoogle:   function (key, val) {
+    if (arguments.length === 1) {
+      val = key;
+      key = null;
+    }
+    return makeObj(key || 'type', helpers.typeFromGoogleType(val));
+  },
+  _typeToGoogle:     function (key, obj) {
+    if (arguments.length === 1) {
+      obj = key;
+      key = null;
+    }
+    return helpers.typeToGoogleType(obj[key || 'type']);
+  },
+  _latLngFromGoogle: function (latKey, lngKey, val) {
+    if (arguments.length === 1) {
+      val = latKey;
+      latKey = null;
+    }
+    return makeObj(latKey || 'lat', val.lat(), lngKey || 'lng', val.lng());
+  },
+  _latLngToGoogle:   function (latKey, lngKey, obj) {
+    if (arguments.length === 1) {
+      obj = latKey;
+      latKey = null;
+    }
+    return helpers.latLngToGoogleLatLng(obj[latKey || 'lat'], obj[lngKey || 'lng']);
+  }
+};
+
+var GoogleObjectProperty = function (key, config) {
+  var props = key.split(',');
+  this._cfg = {
+    key:        key,
+    properties: props,
+    name:       config.name || props.join('_').camelize(),
+    toGoogle:   config.toGoogle || null,
+    fromGoogle: config.fromGoogle || null,
+    read:       config.read || null,
+    write:      config.write || null,
+    event:      config.event || null,
+    cast:       config.cast || null
+  };
+};
+GoogleObjectProperty.prototype.fromGoogleValue = function (value) {
+  var val;
+  if (this._cfg.fromGoogle) {
+    val = this._cfg.fromGoogle.call(this, value);
+  }
+  else {
+    val = makeObj(this._cfg.key, value);
+  }
+  return val;
+};
+GoogleObjectProperty.prototype.toGoogleValue = function (obj) {
+  var val;
+  if (this._cfg.toGoogle) {
+    val = this._cfg.toGoogle.call(this, obj);
+  }
+  else {
+    val = this._cfg.properties.length > 1 ? obj : obj[this._cfg.key];
+    if (this._cfg.cast) {
+      val = this._cfg.cast(val);
+    }
+  }
+  return val;
+};
+GoogleObjectProperty.prototype.readGoogle = function (googleObject) {
+  var val;
+  if (this._cfg.read) {
+    val = this._cfg.read.call(this, googleObject);
+  }
+  else {
+    val = googleObject['get' + this._cfg.name.capitalize()]();
+  }
+  return this.fromGoogleValue(val);
+};
+GoogleObjectProperty.prototype.writeGoogle = function (googleObject, obj) {
+  var val, p, diff = false,
+    actual = this.readGoogle(googleObject);
+  for (var i = 0; i < this._cfg.properties.length; i++) {
+    p = this._cfg.properties[i];
+    if ('' + obj[p] !== '' + actual[p]) {
+      diff = true;
+      break;
+    }
+  }
+  if (!diff) {
+    return;
+  }
+  val = this.toGoogleValue(obj);
+  if (this._cfg.write) {
+    this._cfg.write.call(this, googleObject, val);
+  }
+  else {
+    googleObject['set' + this._cfg.name.capitalize()](val);
+  }
+};
+
+GoogleObjectProperty.prototype.link = function (emberObject, googleObject) {
+  Ember.warn('linking a google object property but it has not been unlinked first', !this._listeners);
+  if (emberObject && googleObject) {
+    this._listeners = {
+      ember:  function () {
+        var obj = emberObject.getProperties(this._cfg.properties);
+        //console.warn('setting GOOGLE', obj);
+        this.writeGoogle(googleObject, obj);
+      },
+      google: Ember.run.bind(this, function () {
+        var p, diff = true,
+          obj = this.readGoogle(googleObject),
+          actual = emberObject.getProperties(this._cfg.properties);
+        for (var i = 0; i < this._cfg.properties.length; i++) {
+          p = this._cfg.properties[i];
+          if ('' + obj[p] !== '' + actual[p]) {
+            diff = true;
+            break;
+          }
+        }
+        if (!diff) {
+          return;
+        }
+        //console.warn('setting EMBER', obj);
+        emberObject.setProperties(obj);
+      })
+    };
+    if (this._cfg.event) {
+      googleObject.addListener(this._cfg.event, this._listeners.google);
+    }
+    this._cfg.properties.forEach(function (name) {
+      emberObject.addObserver(name, this, this._listeners.ember);
+    }, this);
+  }
+};
+GoogleObjectProperty.prototype.unlink = function (emberObject, googleObject) {
+  if (this._listeners) {
+
+    if (this._cfg.event) {
+      googleObject.removeListener(this._cfg.event, this._listeners.google);
+    }
+    this._cfg.properties.forEach(function (name) {
+      emberObject.removeObserver(name, this, this._listeners.ember);
+    }, this);
+    this._listeners = null;
+  }
+};
+GoogleObjectProperty.prototype.toOptions = function (source, options) {
+  var val = this.toGoogleValue(source.getProperties(this._cfg.properties));
+  if (val !== undefined) {
+    options[this._cfg.name] = val;
+  }
+};
+
 var GoogleObjectMixin = Ember.Mixin.create({
   googleProperties:    Ember.required(),
   googleObject:        null,
@@ -18,153 +236,33 @@ var GoogleObjectMixin = Ember.Mixin.create({
    */
   _compiledDefinition: function () {
     var def = this.get('googleProperties') || {},
-      prop, makeReader, makeWriter, res, item, link, unlink,
-      emberToGoogle, googleToEmber, makeToOptions, makeRunOnce;
-
-    makeToOptions = function (props, callback) {
-      var cb = callback;
-      if (props.length > 1) {
-        if (!cb) {
-          throw new TypeError('you must define the option injector for %@'.fmt(props));
-        }
-      }
-      else if (typeof cb === 'string') {
-        cb = function (options, values) {
-          options[callback] = values[props[0]];
-        };
-      }
-      else if (cb !== false) {
-        cb = function (options, values) {
-          options[props[0]] = values[props[0]];
-        };
-      }
-      else {
-        cb = Ember.K;
-      }
-      return cb;
-    };
-    makeReader = function (props, callback) {
-      var cb = callback;
-      if (props.length > 1) {
-        if (!cb) {
-          throw new TypeError('you must define the reader for %@'.fmt(props));
-        }
-      }
-      else if (cb) {
-        cb = function (source) {
-          var r = {};
-          r[props[0]] = callback.apply(this, [source]);
-          return r;
-        };
-      }
-      else {
-        cb = function (source) {
-          var r = {};
-          r[props[0]] = source['get' + props[0].capitalize()]();
-          return r;
-        };
-      }
-      return cb;
-    };
-    makeWriter = function (props, callback) {
-      var cb = callback;
-      if (props.length > 1) {
-        if (!cb) {
-          throw new TypeError('you must define the writer for %@'.fmt(props));
-        }
-      }
-      else if (cb) {
-        cb = function (source, values) {
-          return callback.apply(this, [source, values[props[0]]]);
-        };
-      }
-      else {
-        cb = function (source, values) {
-          return source['set' + props[0].capitalize()](values[props[0]]);
-        };
-      }
-      return  cb;
-    };
-
-    link = function (emberObject, googleObject) {
-      emberObject.addObserver(this.properties, this, 'emberToGoogle');
-      if (this.event) {
-        googleObject.addListener(this.event, this.googleToEmber);
-      }
-    };
-    unlink = function (emberObject, googleObject) {
-      emberObject.removeObserver(this.properties, this, 'emberToGoogle');
-      if (this.event) {
-        googleObject.removeListener(this.event, this.googleToEmber);
-      }
-    };
-    googleToEmber = function (item) {
-      var google, ember, props, set = {}, g = this.get('googleObject');
-      if (g) {
-        ember = this.getProperties(item.properties);
-        google = item.read(g);
-        props = Ember.keys(ember).concat(Ember.keys(google)).uniq();
-        for (var i = 0; i <= props.length; i++) {
-          if (google[props[i]] !== ember[props[i]]) {
-            set[props[i]] = google[props[i]];
-          }
-        }
-        //console.log(set);
-        this.setProperties(set);
-      }
-    };
-    emberToGoogle = function (item) {
-      var google, ember, props, set = false, g = this.get('googleObject');
-      if (g) {
-        ember = this.getProperties(item.properties);
-        google = item.read(g);
-        props = Ember.keys(ember).concat(Ember.keys(google)).uniq();
-        for (var i = 0; i <= props.length; i++) {
-          if (google[props[i]] !== ember[props[i]]) {
-            set = true;
-            break;
-          }
-        }
-        item.write(g, ember);
-      }
-    };
-    makeRunOnce = function () {
-      var args = [].slice.call(arguments);
-      return function () {
-        Ember.run.once.apply(Ember.run, args);
-      };
-    };
-    res = [];
+      res = [], d;
     for (var k in def) {
       if (def.hasOwnProperty(k)) {
-        prop = def[k];
-        item = {};
-        item.properties = k.split(',');
-        item.event = prop.event || null;
-        item.toOptions = makeToOptions(item.properties, prop.toOptions);
-        item.read = makeReader(item.properties, prop.read);
-        item.write = makeWriter(item.properties, prop.write);
-        item.link = link;
-        item.unlink = unlink;
-        item.emberToGoogle = makeRunOnce(this, emberToGoogle, item);
-        item.googleToEmber = makeRunOnce(this, googleToEmber, item);
-        res.push(item);
-        item = null;
+        d = def[k];
+        if (typeof d === 'string') {
+          d = {name: d};
+        }
+        else if (d === true) {
+          d = {};
+        }
+        res.push(new GoogleObjectProperty(k, d));
+        d = null;
       }
     }
     return res;
   }.property().readOnly(),
 
   serializeGoogleOptions: function () {
-    var res = {}, def = this.get('_compiledDefinition');
-    for (var i = 0; i < def.length; i++) {
-      def[i].toOptions.call(this, res, this.getProperties(def[i].properties));
+    var i, res = {}, def = this.get('_compiledDefinition');
+    for (i = 0; i < def.length; i++) {
+      def[i].toOptions(this, res);
     }
     return res;
   },
 
   unlinkGoogleObject: function () {
-    var old = this.get('googleObject');
+    var old = this.cacheFor('googleObject');
     if (old) {
       this.get('_compiledDefinition').invoke('unlink', this, old);
     }
@@ -184,74 +282,93 @@ var GoogleObjectMixin = Ember.Mixin.create({
 });
 
 
-var GoogleMapMarkerController = Ember.ObjectController.extend({
-  map:  Ember.computed.oneWay('parentController.map'),
-  init: function () {
-    this._super.apply(this, arguments);
-    console.log('parent:', this.get('parentController'));
-    console.log('parent.parent:', this.get('parentController.parentController'));
-  }
+var GoogleMapMarkerController = Ember.ObjectController.extend(GoogleObjectMixin, {
+  googleProperties: {
+    isClickable: { name: 'clickable' },
+    isVisible:   { name: 'visible', event: 'visible_changed' },
+    title:       { event: 'title_changed' },
+    opacity:     { cast: Number },
+    icon:        true,
+    map:         true,
+    'lat,lng':   {
+      name:       'position',
+      event:      'position_changed',
+      toGoogle:   helpers._latLngToGoogle,
+      fromGoogle: helpers._latLngFromGoogle
+    }
+  },
+
+  map: Ember.computed.oneWay('parentController.map'),
+
+  googleObject: function (key, value) {
+    var opt, go;
+    if (arguments.length >= 2) {
+      if ((go = this.cacheFor('googleObject'))) {
+        go.setMap(null);
+      }
+    }
+    else {
+      if (hasGoogleLib()) {
+        opt = this.serializeGoogleOptions();
+        Ember.debug('[google-maps] creating new marker: %@'.fmt(opt));
+        value = new google.maps.Marker(opt);
+      }
+    }
+    return value;
+  }.property(),
+
+  initGoogleMarker: function () {
+    Ember.run.next(this, 'get', 'googleObject');
+  }.on('init')
 });
 
 var GoogleMapMarkersController = Ember.ArrayController.extend({
-  itemController: GoogleMapMarkerController,
-  map:            Ember.computed.oneWay('parentController.googleObject'),
-  content:        Ember.computed.oneWay('parentController.markers')
+  itemController: 'google-map/marker',
+  container:      Ember.computed.oneWay('mapComponent.container'),
+  map:            Ember.computed.oneWay('mapComponent.googleObject'),
+  model:          Ember.computed.oneWay('mapComponent.markers')
 });
 
 
 var GoogleMapComponent = Ember.Component.extend(GoogleObjectMixin, {
   googleProperties: {
-    zoom:      { event: 'zoom_changed' },
+    zoom:      { event: 'zoom_changed', cast: Number },
     type:      {
-      event:     'maptypeid_changed',
-      toOptions: function (options, val) {
-        options.mapTypeId = GoogleMapComponent.typeToGoogleType(val.type);
-      },
-      read:      function (source) {
-        return GoogleMapComponent.typeFromGoogleType(source.getMapTypeId());
-      },
-      write:     function (source, val) {
-        source.setMapTypeId(GoogleMapComponent.typeToGoogleType(val));
-      }
+      name:       'mapTypeId',
+      event:      'maptypeid_changed',
+      toGoogle:   helpers._typeToGoogle,
+      fromGoogle: helpers._typeFromGoogle
     },
     'lat,lng': {
-      event:     'center_changed',
-      toOptions: function (options, val) {
-        options.center = GoogleMapComponent.latLngToGoogleLatLng(val.lat, val.lng);
-      },
-      read:      function (source) {
-        var c = source.getCenter();
-        return { lat: c.lat(), lng: c.lng() };
-      },
-      write:     function (source, val) {
-        source.setCenter(GoogleMapComponent.latLngToGoogleLatLng(val.lat, val.lng));
-      }
+      name:       'center',
+      event:      'center_changed',
+      toGoogle:   helpers._latLngToGoogle,
+      fromGoogle: helpers._latLngFromGoogle
     }
   },
+
   /**
    * @property googleObject
    * @type google.maps.Map
    * @private
    */
-  googleObject:     null,
+  googleObject: null,
   /**
    * @property lat
    * @type Number
    */
-  lat:              0,
+  lat:          0,
   /**
    * @property lng
    * @type Number
    */
-  lng:              0,
-
+  lng:          0,
   /**
    * @property zoom
    * @type Number
    * @default 5
    */
-  zoom: 5,
+  zoom:         5,
 
   /**
    * @property type
@@ -261,26 +378,24 @@ var GoogleMapComponent = Ember.Component.extend(GoogleObjectMixin, {
    */
   type: 'road',
 
-  markers: [
-    {},
-    {}
-  ],
+  markers: null,
 
   _markers: function () {
-    return new GoogleMapMarkersController({
-      parentController: this
+    return GoogleMapMarkersController.create({
+      mapComponent: this
     });
   }.property().readOnly(),
 
 
   initGoogleMap: function () {
-    var canvas, opt;
+    var canvas, opt, map;
     this.destroyGoogleMap();
     if (hasGoogleLib()) {
       canvas = this.$('div.map-canvas')[0];
       opt = this.serializeGoogleOptions();
       Ember.debug('[google-map] creating map with options: %@'.fmt(opt));
-      this.set('googleObject', new google.maps.Map(canvas, opt));
+      map = new google.maps.Map(canvas, opt);
+      this.set('googleObject', map);
     }
   }.on('didInsertElement'),
 
@@ -292,55 +407,8 @@ var GoogleMapComponent = Ember.Component.extend(GoogleObjectMixin, {
   }.on('willDestroyElement')
 });
 
-
-GoogleMapComponent.reopenClass({
-  TYPE_ROAD:      'road',
-  TYPE_TERRAIN:   'terrain',
-  TYPE_HYBRID:    'hybrid',
-  TYPE_SATELLITE: 'satellite',
-
-  _typeMap:             {
-    road:      'ROADMAP',
-    terrain:   'TERRAIN',
-    hybrid:    'HYBRID',
-    satellite: 'SATELLITE'
-  },
-  /**
-   * Convert our type to the google one
-   * @param {String} type
-   * @returns {String}
-   */
-  typeToGoogleType:     function (type) {
-    var name;
-    if (hasGoogleLib() && (name = this._typeMap[type])) {
-      return google.maps.MapTypeId[name];
-    }
-  },
-  /**
-   * Convert google map type to our type
-   * @param {String} type
-   * @returns {string}
-   */
-  typeFromGoogleType:   function (type) {
-    if (hasGoogleLib() && type) {
-      for (var k in this._typeMap) {
-        if (this._typeMap.hasOwnProperty(k) && google.maps.MapTypeId[this._typeMap[k]] === type) {
-          return k;
-        }
-      }
-    }
-  },
-  /**
-   * Convert a lat/lng pair to a google one
-   * @param {Number} lat
-   * @param {Number} lng
-   * @returns {google.maps.LatLng}
-   */
-  latLngToGoogleLatLng: function (lat, lng) {
-    if (lat != null && lng != null && hasGoogleLib()) {
-      return new google.maps.LatLng(lat, lng);
-    }
-  }
-});
+helpers.GoogleMapMarkerController = GoogleMapMarkerController;
+helpers.GoogleMapMarkersController = GoogleMapMarkersController;
+GoogleMapComponent.reopenClass(helpers);
 
 export default GoogleMapComponent;
