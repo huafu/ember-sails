@@ -4,7 +4,129 @@ import Ember from 'ember';
 function hasGoogleLib() {
   return (window.google && google.maps);
 }
-var GoogleOptions = Ember.Object.extend({
+
+var GoogleObjectMixin = Ember.mixin.create({
+  _definition:         Ember.required(),
+  _googleObject:       null,
+  /**
+   * @property _compiledDefinition
+   * @type Array<Object>
+   */
+  _compiledDefinition: function () {
+    var def = this.get('_definition') || {},
+      prop, makeReader, makeWriter, res, item, link, unlink,
+      emberToGoogle, googleToEmber;
+
+    makeReader = function (props, cb) {
+      if (props.length > 1 && !cb) {
+        throw new TypeError('you must define the reader for %@'.fmt(props));
+      }
+      return cb || function (source) {
+        var r = {};
+        r[props[0]] = source['get' + props[0].capitalize()];
+        return r;
+      };
+    };
+    makeWriter = function (props, cb) {
+      if (props.length > 1 && !cb) {
+        throw new TypeError('you must define the writer for %@'.fmt(props));
+      }
+      return  cb || function (source, values) {
+        return source['set' + props[0].capitalize()](values[props[0]]);
+      };
+    };
+
+    link = function (emberObject, googleObject) {
+      emberObject.addObserver(item.properties, this, 'emberToGoogle');
+      if (this.event) {
+        googleObject.addListener(this.event, this.googleToEmber);
+      }
+    };
+    unlink = function (emberObject, googleObject) {
+      emberObject.removeObserver(item.properties, this, 'emberToGoogle');
+      if (this.event) {
+        googleObject.removeListener(this.event, this.googleToEmber);
+      }
+    };
+    googleToEmber = function () {
+      var google, ember, props, set = {}, g = this.owner.get('_googleObject');
+      if (g) {
+        ember = this.owner.getProperties(this.properties);
+        google = item.read(g);
+        props = Ember.keys(ember).concat(Ember.keys(google)).uniq();
+        for (var i = 0; i <= props.length; i++) {
+          if (google[props[i]] !== ember[props[i]]) {
+            set[props[i]] = google[i];
+          }
+        }
+        this.owner.setProperties(set);
+      }
+    };
+    googleToEmber.bound = function () {
+      Ember.run.once(this, googleToEmber);
+    };
+    emberToGoogle = function () {
+      var google, ember, props, set = false, g = this.owner.get('_googleObject');
+      if (g) {
+        ember = this.owner.getProperties(this.properties);
+        google = item.read(g);
+        props = Ember.keys(ember).concat(Ember.keys(google)).uniq();
+        for (var i = 0; i <= props.length; i++) {
+          if (google[props[i]] !== ember[props[i]]) {
+            set = true;
+            break;
+          }
+        }
+        this.write(g, ember);
+      }
+    };
+    emberToGoogle.bound = function () {
+      Ember.run.once(this, emberToGoogle);
+    };
+    res = [];
+    for (var k in def) {
+      if (def.hasOwnProperty(k)) {
+        prop = def[k];
+        item = { owner: this };
+        item.properties = k.split(',');
+        item.event = prop.event || null;
+        item.read = makeReader(item.properties, prop.read);
+        item.write = makeWriter(item.properties, prop.write);
+        item.link = link;
+        item.unlink = unlink;
+        item.emberToGoogle = emberToGoogle.bound;
+        item.googleToEmber = googleToEmber.bound.bind(item);
+        res.push(item);
+      }
+    }
+    return res;
+  }.property().readOnly(),
+
+  unlinkGoogleObject: function () {
+    var old = this.get('_googleObject');
+    if (old) {
+      this.get('_compiledDefinition').invoke('unlink', this, old);
+    }
+  }.observesBefore('_googleObject'),
+
+  linkGoogleObject: function () {
+    var obj = this.get('_googleObject');
+    if (obj) {
+      this.get('_compiledDefinition').invoke('link', this, obj);
+    }
+  }.observes('_googleObject'),
+
+  destroyGoogleObject: function () {
+    var def = this.get('_compiledDefinition');
+    this.set('_googleObject', null);
+    def.map(function(item){
+      item.owner = null;
+    });
+    def.clear();
+  }.on('destroy')
+});
+
+var GoogleMapOptions = Ember.Object.extend({
   _map: null,
   zoom: 6,
   lat:  0,
@@ -133,6 +255,22 @@ var GoogleOptions = Ember.Object.extend({
   }
 });
 
+var GoogleMapMarkerController = Ember.ObjectController.extend({
+  toGoogleOptions: function () {
+    var opt;
+    if (hasGoogleLib()) {
+      opt = {};
+      if (this.get('clickable'))
+        }
+    }
+  });
+
+var GoogleMapMarkersController = Ember.ArrayController.extend({
+  itemController: GoogleMapMarkerController,
+
+});
+
+
 var GoogleMapComponent = Ember.Component.extend({
   /**
    * @property _map
@@ -143,10 +281,10 @@ var GoogleMapComponent = Ember.Component.extend({
   /**
    * @property _options
    * @private
-   * @type GoogleOptions
+   * @type GoogleMapOptions
    */
   _options:  function () {
-    return GoogleOptions.create();
+    return GoogleMapOptions.create();
   }.property(),
   /**
    * @property centerLat
