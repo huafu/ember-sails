@@ -4,13 +4,12 @@ import Ember from 'ember';
 function hasGoogleLib() {
   return (window.google && google.maps);
 }
-
 var GoogleOptions = Ember.Object.extend({
   _map: null,
-  zoom: null,
-  lat:  null,
-  lng:  null,
-  type: null,
+  zoom: 6,
+  lat:  0,
+  lng:  0,
+  type: 'road',
 
   zoomDidChange: function () {
     if (this._map) {
@@ -38,9 +37,14 @@ var GoogleOptions = Ember.Object.extend({
     };
   }.property().readOnly(),
 
+  _log: function () {
+    Ember.debug('map settings: %@'.fmt(this.serialize()));
+  }.observes('lat', 'lng', 'zoom', 'type').on('init'),
+
   attachMap: function (map) {
     var events;
     if (this._map !== map) {
+      Ember.debug('[google-map][options] attaching map');
       this.detachMap();
       this._map = map;
       events = this.get('_eventMap');
@@ -55,6 +59,7 @@ var GoogleOptions = Ember.Object.extend({
   detachMap: function () {
     var events;
     if (this._map) {
+      Ember.debug('[google-map][options] detaching map');
       events = this.get('_eventMap');
       for (var k in events) {
         if (events.hasOwnProperty(k)) {
@@ -65,60 +70,64 @@ var GoogleOptions = Ember.Object.extend({
     }
   },
 
-  toObject:    function () {
+  serialize: function () {
+    return this.getProperties('lat', 'lng', 'zoom', 'type');
+  },
+
+  toGoogleOptions: function () {
     var opt = {}, v;
     if ((v = GoogleMapComponent.latLngToGoogleLatLng(this.get('lat'), this.get('lng')))) {
       opt.center = v;
     }
     if ((v = this.get('type'))) {
-      opt.mapTypeId = v;
+      opt.mapTypeId = GoogleMapComponent.typeToGoogleType(v);
     }
     if ((v = this.get('zoom'))) {
       opt.zoom = v;
     }
     return opt;
   },
-  readZoom:    function (map) {
+  readZoom:        function (map) {
     map = map || this._map;
     var v;
     if (map && (v = map.getZoom()) !== this.get('zoom')) {
       this.set('zoom', v);
     }
   },
-  writeZoom:   function (map) {
+  writeZoom:       function (map) {
     map = map || this._map;
     var v = this.get('zoom');
     if (map && v && map.getZoom() !== v) {
       Ember.run.once(map, 'setZoom', v);
     }
   },
-  readType:    function (map) {
+  readType:        function (map) {
     map = map || this._map;
     var v;
     if (map && (v = GoogleMapComponent.typeFormGoogleType(map.getMapTypeId())) !== this.get('type')) {
       this.set('type', v);
     }
   },
-  writeType:   function (map) {
+  writeType:       function (map) {
     map = map || this._map;
     var v = GoogleMapComponent.typeToGoogleType(this.get('type'));
     if (map && v && map.getMapTypeId() !== v) {
       Ember.run.once(map, 'setMapTypeId', v);
     }
   },
-  readCenter:  function (map) {
+  readCenter:      function (map) {
     map = map || this._map;
     var lat, lng, v;
-    if (map && (v = map.getCenter()) && (lat = v.lat) && (lng = v.lng) &&
+    if (map && (v = map.getCenter()) && (lat = v.lat()) && (lng = v.lng()) &&
       (lat !== this.get('lat') || lng !== this.get('lng'))) {
       this.setProperties({ lat: lat, lng: lng });
     }
   },
-  writeCenter: function (map) {
+  writeCenter:     function (map) {
     map = map || this._map;
     var v, lat = this.get('lat'), lng = this.get('lng');
     if (map && lat != null && lng != null && (v = map.getCenter()) &&
-      (v.lat !== lat || v.lng !== lng)) {
+      (v.lat() !== lat || v.lng() !== lng)) {
       Ember.run.once(map, 'setCenter', GoogleMapComponent.latLngToGoogleLatLng(lat, lng));
     }
   }
@@ -161,7 +170,7 @@ var GoogleMapComponent = Ember.Component.extend({
    * @property type
    * @type String
    * @enum ['road', 'hybrid', 'terrain', 'satellite']
-   * @default 'read'
+   * @default 'road'
    */
   type: Ember.computed.alias('_options.type'),
 
@@ -171,13 +180,16 @@ var GoogleMapComponent = Ember.Component.extend({
     if (hasGoogleLib()) {
       canvas = this.$('div.map-canvas')[0];
       opt = this.get('_options');
-      this._map = new google.maps.Map(canvas, opt.toObject());
+      Ember.debug('[google-map] creating map with options: %@'.fmt(opt.serialize()));
+      console.log(opt.toGoogleOptions());
+      this._map = new google.maps.Map(canvas, opt.toGoogleOptions());
       opt.attachMap(this._map);
     }
   }.on('didInsertElement'),
 
   destroyGoogleMap: function () {
     if (this._map) {
+      Ember.debug('[google-map] destroying map');
       this.get('_options').detachMap();
       this._map = null;
     }
@@ -200,7 +212,7 @@ GoogleMapComponent.reopenClass({
   /**
    * Convert our type to the google one
    * @param {String} type
-   * @returns {Number}
+   * @returns {String}
    */
   typeToGoogleType:     function (type) {
     var name;
@@ -210,7 +222,7 @@ GoogleMapComponent.reopenClass({
   },
   /**
    * Convert google map type to our type
-   * @param {Number} type
+   * @param {String} type
    * @returns {string}
    */
   typeFromGoogleType:   function (type) {
