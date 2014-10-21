@@ -26,7 +26,8 @@ exports.register = function (req, res, next) {
   var email = req.param('email'),
     username = req.param('username'),
     password = req.param('password'),
-    user = null;
+    user = null,
+    error = null;
 
   if (!email) {
     req.flash('error', 'Error.Passport.Email.Missing');
@@ -38,49 +39,49 @@ exports.register = function (req, res, next) {
     return next(new Error('No password was entered.'));
   }
 
-  User.create({
-  })
-    .then(function setupUserVar(record) {
+  User.create()
+    .then(function setUserVar(record) {
       user = record;
+      return user;
     })
     .then(function associateEmailPassport() {
-      return user.associatePassportAsync(PassportType.EMAIL, email, {protocol: 'local', password: password});
+      return user
+        .associatePassportAsync(PassportType.EMAIL, email, {protocol: 'local', password: password})
+        .save();
     })
     .then(function associateUsernamePassport() {
       if (username) {
-        return user.associatePassportAsync(PassportType.USERNAME, username);
+        return user
+          .associatePassportAsync(PassportType.USERNAME, username)
+          .save();
       }
     })
     .then(function saveUser() {
       // will save passport associations and passport updates
       return user.save();
     })
-    .then(function () {
-      // all done, return our new registered user
-      next(null, user);
-    })
-    .fail(function (err) {
-      if (err.code === 'E_VALIDATION') {
-        if (err.invalidAttributes.email) {
-          req.flash('error', 'Error.Passport.Email.Exists');
-        }
-        else if (err.invalidAttributes.password) {
-          req.flash('error', 'Error.Passport.Password.Invalid');
-        }
-        else {
-          req.flash('error', 'Error.Passport.User.Exists');
-        }
-      }
+    .catch(function handleError(err) {
+      error = err;
       // delete the created user if any
       if (user) {
-        user.destroy(function (destroyErr) {
-          next(destroyErr || err);
-        });
+        return user
+          .destroy()
+          .finally(Promise.reject.bind(Promise, err));
       }
       else {
-        next(err);
+        return err;
       }
-    });
+    })
+    .finally(function sendResponse() {
+      if (error) {
+        req.flash(error);
+        next(error);
+      }
+      else {
+        next(null, user);
+      }
+    })
+    .done();
 };
 
 /**
@@ -97,15 +98,30 @@ exports.register = function (req, res, next) {
 exports.connect = function (req, res, next) {
   var user = req.user,
     password = req.param('password'),
-    email = req.param('email');
+    email = req.param('email'),
+    error = null;
 
   user.associatePassportAsync(PassportTpye.EMAIL, email, {protocol: 'local', password: password})
+    .then(function savePassport(passport) {
+      return passport.save();
+    })
     .then(function saveUser() {
       return user.save();
     })
-    .then(function (user) {
-      next(null, user);
-    }, next);
+    .catch(function handleError(err) {
+      error = err;
+      return err;
+    })
+    .finally(function sendResponse() {
+      if (error) {
+        req.flash(error);
+        next(error);
+      }
+      else {
+        next(null, user);
+      }
+    })
+    .done();
 };
 
 /**
@@ -121,7 +137,9 @@ exports.connect = function (req, res, next) {
  * @param {Function} next
  */
 exports.login = function (req, identifier, password, next) {
-  var isEmail = validator.isEmail(identifier);
+  var isEmail = validator.isEmail(identifier),
+    userRecord = null,
+    error = null;
 
   if (!password) {
     req.flash('error', 'Error.Passport.Password.NotSet');
@@ -137,24 +155,30 @@ exports.login = function (req, identifier, password, next) {
     .then(function checkUserPassword(user) {
       if (!user) {
         if (isEmail) {
-          req.flash('error', 'Error.Passport.Email.NotFound');
+          throw new Error('Error.Passport.Email.NotFound');
         }
         else {
-          req.flash('error', 'Error.Passport.Username.NotFound');
+          throw new Error('Error.Passport.Username.NotFound');
         }
-
-        next(null, false);
       }
       else {
         // email has been populated automatically by `User.findByPassport`
-        user.email.validatePassword(password)
-          .then(function (res) {
-            if (!res) {
-              req.flash('error', 'Error.Passport.Password.Wrong');
-              return next(null, false);
-            }
-            next(null, user);
-          }, next);
+        userRecord = user;
+        return user.email.validatePassword(password);
       }
-    }, next);
+    })
+    .catch(function handleError(err) {
+      error = err;
+      return err;
+    })
+    .finally(function sendResponse() {
+      if (error) {
+        req.flash(error);
+        next(error);
+      }
+      else {
+        next(null, userRecord);
+      }
+    })
+    .done();
 };

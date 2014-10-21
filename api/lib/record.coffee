@@ -23,7 +23,7 @@ self = module.exports =
     if _.isObject(recordOrId)
       if Model
         Model = model.modelFor(Model)
-        if not Model || model.forRecord(recordOrId) isnt Model
+        if not Model or model.forRecord(recordOrId) isnt Model
           throw new TypeError("given record must be of model `#{ model.nameFor(Model) }`")
       self.primaryKeyValueFor(recordOrId)
     else

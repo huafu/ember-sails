@@ -2,7 +2,8 @@ var path = require('path'),
   url = require('url'),
   pass = require('passport'),
   record = require('../lib/record'),
-  str = require('../lib/string');
+  str = require('../lib/string'),
+  PassportConnection = require('./passport/connection');
 
 /**
  * Passport Service
@@ -65,177 +66,66 @@ pass.protocols = require('./protocols');
  * @param {Function} next
  */
 pass.connect = function (req, query, profile, next) {
-  var providerPassport = {},
-    passports = [],
-    userRecord = req.user || null,
-    error = null,
-    provider, identifier;
+  var pc = new PassportConnection(
+    // Use profile.provider or fallback to the query.provider if it is undefined
+    // as is the case for OpenID, for example
+    req.user, profile.provider || req.param('provider'), query.identifier.toString()
+  );
 
-  // Use profile.provider or fallback to the query.provider if it is undefined
-  // as is the case for OpenID, for example
-  provider = profile.provider || req.param('provider');
-  identifier = query.identifier.toString();
-  // fill up our provider passport
-  providerPassport.identifier = identifier;
-  providerPassport.type = provider;
+  // start by checking input and grabbing some data from the given profile and query
+  pc.start()
+    .then(pc.checkInput.bind(pc))
+    .then(pc.parseProfile.bind(pc, profile))
+    .then(pc.parseQuery.bind(pc, query))
+    .then(pc.lookupPassportRecord.bind(pc))
+    .then(function handleConnectScenario() {
 
-  // If the provider cannot be identified we cannot match it to a passport so
-  // throw an error and let whoever's next in line take care of it.
-  if (!provider) {
-    return next(new Error('No authentication provider given.'));
-  }
-  if (!identifier) {
-    return next(new Error('No authentication identifier given.'));
-  }
-
-  // If the profile object contains a list of emails...
-  if (profile.hasOwnProperty('emails') && profile.emails.length) {
-    passports.push.apply(passports, _.map(profile.emails, function (email) {
-      return {type: PassportType.EMAIL, identifier: email.value};
-    }));
-  }
-  // If the profile object contains a username...
-  if (profile.hasOwnProperty('username') && profile.username) {
-    passports.push({type: PassportType.USERNAME, identifier: profile.username});
-  }
-  // If the profile object contains a displayName...
-  if (profile.hasOwnProperty('displayName') && profile.displayName) {
-    providerPassport.displayName = profile.displayName;
-  }
-
-  // If we got an avatar for this provider, add it
-  if (profile.hasOwnProperty('photos') && profile.photos.length) {
-    providerPassport.avatarUrl = profile.photos[0].value;
-  }
-
-  // If we got a profile URL for this provider, add it
-  if (profile.hasOwnProperty('profileUrl') && profile.profileUrl) {
-    providerPassport.profileUrl = profile.profileUrl;
-  }
-
-  // Get the tokens
-  if (query.hasOwnProperty('tokens') && query.tokens) {
-    providerPassport.tokens = query.tokens;
-  }
-
-  // Get the protocol
-  if (query.hasOwnProperty('protocol') && query.protocol) {
-    providerPassport.protocol = query.protocol;
-  }
-
-  Passport
-    .findByTypeAndIdentifier(provider, identifier)
-    .populate('user')
-    .then(function (passport) {
-      if (!userRecord) {
+      if (!pc.userRecord) {
         // Scenario: A new user is attempting to sign up using a third-party
         //           authentication provider.
         // Action:   Create a new user and assign them a passport.
-        if (!passport) {
-          return User
-            .create({})
-            .then(function registerCreatedUser(user) {
-              userRecord = user;
-              return user;
-            })
-            .then(function associateProviderPassport() {
-              return userRecord.associatePassportAsync(provider, identifier, providerPassport);
-            })
-            .then(function saveProviderPassport(passport) {
-              return passport.save();
-            })
-            .then(function associateSecondaryPassports() {
-              // here we don't care if some are failing, our main one is saved already
-              return userRecord.associatePassportsAsync(passports, 'settle', true);
-            })
-            .tap(function logPossibleSecondaryPassportsSaveErrors(results) {
-              for (var i = 0; i < results.length; i++) {
-                if (results[i].isRejected()) {
-                  console.warn('associating a passport failed silently:', results[i].reason());
-                }
-              }
-            })
-            .then(function saveUser() {
-              return userRecord.save();
-            });
+        if (!pc.passportRecord) {
+          return pc
+            .createUserRecord()
+            .then(pc.createAndAssociatePassport.bind(pc))
+            .then(pc.createAndAssociateSecondaryPassports.bind(pc))
+            .then(pc.saveUserRecord.bind(pc));
         }
         // Scenario: An existing user is trying to log in using an already
         //           connected passport.
         // Action:   Get the user associated with the passport.
         else {
-          // If the tokens have changed since the last session, update them
-          if (providerPassport.tokens) {
-            passport.tokens = providerPassport.tokens;
-          }
-          // update other attributes if they were empty
-          if (!passport.avatarUrl && providerPassport.avatarUrl) {
-            passport.avatarUrl = providerPassport.avatarUrl;
-          }
-          if (!passport.displayName && providerPassport.displayName) {
-            passport.displayName = providerPassport.displayName;
-          }
-          // Save any updates to the Passport before moving on
-          return passport
-            .save()
-            .then(function associateSecondaryPassports() {
-              // here we don't care if some are failing, our main one is saved already
-              return userRecord.associatePassportsAsync(passports, 'settle', true);
-            })
-            .tap(function logPossibleSecondaryPassportsSaveErrors(results) {
-              for (var i = 0; i < results.length; i++) {
-                if (results[i].isRejected()) {
-                  console.warn('associating a passport failed silently:', results[i].reason());
-                }
-              }
-            })
-            .then(function saveUser() {
-              return userRecord.save();
-            });
+          return pc
+            .updatePassportRecord()
+            .then(pc.createAndAssociateSecondaryPassports.bind(pc))
+            .then(pc.saveUserRecord.bind(pc));
         }
       }
       else {
         // Scenario: A user is currently logged in and trying to connect a new
         //           passport.
         // Action:   Create and assign a new passport to the user.
-        if (!passport) {
-          userRecord
-            .associatePassportAsync(provider, identifier, providerPassport)
-            .then(function savePassport(passport) {
-              return passport.save();
-            })
-            .then(function associateSecondaryPassports() {
-              // here we don't care if some are failing, our main one is saved already
-              return userRecord.associatePassportsAsync(passports, 'settle', true);
-            })
-            .tap(function logPossibleSecondaryPassportsSaveErrors(results) {
-              for (var i = 0; i < results.length; i++) {
-                if (results[i].isRejected()) {
-                  console.warn('associating a passport failed silently:', results[i].reason());
-                }
-              }
-            })
-            .then(function saveUser() {
-              return userRecord.save();
-            });
+        if (!pc.passportRecord) {
+          return pc
+            .createAndAssociatePassport()
+            .then(pc.createAndAssociateSecondaryPassports.bind(pc))
+            .then(pc.saveUserRecord.bind(pc));
         }
         // Scenario: The user is a nutjob or spammed the back-button.
         // Action:   Simply pass along the already established session.
         else {
-          return Promise.resolve(userRecord);
+          return pc.resolve();
         }
       }
     })
-    .catch(function handleError(err) {
-      // TODO: handle all different cases correctly (might have to add catch blocks upstream
-      error = err;
-    })
+    .catch(pc.handleError.bind(pc))
     .finally(function sendResponse() {
-      if (error) {
-        req.flash(error);
-        next(error);
+      if (pc.error) {
+        req.flash(pc.error);
+        next(pc.error);
       }
       else {
-        next(null, userRecord);
+        next(null, pc.userRecord);
       }
     })
     .done();
@@ -402,7 +292,8 @@ pass.disconnect = function (req, res, next) {
   var passports,
     user = req.user,
     provider = req.param('provider'),
-    identifier = req.param('identifier');
+    identifier = req.param('identifier'),
+    error = null;
 
   // try to find the identifier
   if (!identifier) {
@@ -423,13 +314,26 @@ pass.disconnect = function (req, res, next) {
   }
 
   user.dissociatePassportAsync(provider, identifier)
-    .then(function saveUserAndPassport() {
+    .then(function savePassport(passport) {
+      return passport.save();
+    })
+    .then(function saveUser() {
       return user.save();
     })
-    .then(function (user) {
-      next(null, user);
-      return user;
-    }, next);
+    .catch(function handleError(err) {
+      error = err;
+      return err;
+    })
+    .finally(function sendResponse() {
+      if (error) {
+        req.flash(error);
+        next(error);
+      }
+      else {
+        next(null, user);
+      }
+    })
+    .done();
 };
 
 pass.serializeUser(function (user, next) {

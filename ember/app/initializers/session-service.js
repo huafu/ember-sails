@@ -1,6 +1,6 @@
 export default {
   name:  'session-service',
-  after: 'store',
+  after: 'store-preload',
 
   initialize: function (container, app) {
     app.inject('route', 'session', 'service:session');

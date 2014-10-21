@@ -1,5 +1,6 @@
 /* globals -User */
-var record = require('../lib/record'),
+var model = require('../lib/model'),
+  record = require('../lib/record'),
   Promise = require('bluebird');
 
 /**
@@ -58,19 +59,19 @@ var User = {
       }
       if (!associated) {
         this.passports.add(passport);
-        typeCode = passport.getTypeCode();
-        if (!this.username && typeCode === PassportType.USERNAME) {
-          this.username = passport;
-        }
-        else if (!this.email && typeCode === PassportType.EMAIL) {
-          this.email = passport;
-        }
-        if (!this.avatar && passport.avatarUrl) {
-          this.avatar = passport;
-        }
-        if (!this.displayName && passport.displayName) {
-          this.displayName = passport.displayName;
-        }
+      }
+      typeCode = passport.getTypeCode();
+      if (!this.username && typeCode === PassportType.USERNAME) {
+        this.username = passport;
+      }
+      else if (!this.email && typeCode === PassportType.EMAIL) {
+        this.email = passport;
+      }
+      if (!this.avatar && passport.avatarUrl) {
+        this.avatar = passport;
+      }
+      if (!this.displayName && passport.displayName) {
+        this.displayName = passport.displayName;
       }
       return this;
     },
@@ -108,14 +109,25 @@ var User = {
      * @method associatePassportAsync
      * @param {String|PassportType} type
      * @param {String} identifier
-     * @param {Object} [update]
+     * @param {Object} [values]
      * @returns {Deferred}
      */
-    associatePassportAsync: function (type, identifier, update) {
-      var self = this;
-      return Passport.findOrCreateByTypeAndIdentifier(type, identifier, update)
-        .then(function (passport) {
+    associatePassportAsync: function (type, identifier, values) {
+      var self = this,
+        excluded = ['identifier', 'type', model.primaryKeyNameFor(Passport)];
+      return Passport.findOrCreateByTypeAndIdentifier(type, identifier, values)
+        .populateAll()
+        .then(function updatePassportProperties(passport) {
+          for (var k in values) {
+            if (excluded.indexOf(k) < 0 && values.hasOwnProperty(k)) {
+              passport[k] = values[k];
+            }
+          }
+          return passport;
+        })
+        .then(function associatePassport(passport) {
           self.associatePassport(passport);
+          return passport;
         });
     },
 
@@ -130,11 +142,12 @@ var User = {
      */
     dissociatePassportAsync: function (type, identifier) {
       var self = this;
-      return Passport.findByTypeAndIdentifier(type, identifier, {user: this.id})
-        .then(function (passport) {
+      return Passport.findByTypeAndIdentifier(type, identifier, {user: record.identify(this)})
+        .then(function dissociatePassport(passport) {
           if (passport) {
             self.dissociatePassport(passport);
           }
+          return passport;
         });
     },
 
@@ -146,11 +159,20 @@ var User = {
      * @method associatePassportsAsync
      * @param {Array<Object>} passports
      * @param {String} [promiseMethod='all']
+     * @param {Boolean} [save]
      * @returns {Deferred}
      */
-    associatePassportsAsync: function (passports, promiseMethod) {
+    associatePassportsAsync: function (passports, promiseMethod, save) {
       var identifier, type, values, one,
         promises = [];
+
+      function savePassport(passport) {
+        if (save) {
+          return passport.save();
+        }
+        return passport;
+      }
+
       // build parameters for each passport and get the promise
       for (var i = 0; i < passports.length; i++) {
         one = passports[i];
@@ -159,7 +181,12 @@ var User = {
         values = _.merge({}, one);
         delete values.identifier;
         delete values.type;
-        promises.push(this.associatePassportAsync(type, identifier, values));
+        promises.push(
+          this
+            .associatePassportAsync(type, identifier, values)
+            .then(savePassport)
+            .done()
+        );
       }
       return Promise[promiseMethod || 'all'](promises);
     },
@@ -176,6 +203,18 @@ var User = {
       console.assert(identifier, 'passport identifier required');
       console.assert(type, 'passport type required');
       return _.find(this.passports, {type: record.identify(type, PassportType), identifier: identifier});
+    },
+
+    /**
+     * Finds all passports in the populated passports for the given type (provider)
+     *
+     * @method populatedPassports
+     * @param {String|PassportType} type
+     * @return {Array<Passport>}
+     */
+    populatedPassports: function (type) {
+      console.assert(type, 'passport type required');
+      return _.filter(this.passports, {type: record.identify(type, PassportType)});
     }
   },
 
@@ -190,9 +229,10 @@ var User = {
    */
   findByPassport: function (type, identifier) {
     var self = this;
-    return Passport.findByTypeAndIdentifier(type, identifier, {user: {not: null}})
-      .then(function (passport) {
-        return self.findOne(record.identify(passport.user)).populate('email');
+    return Passport
+      .findByTypeAndIdentifier(type, identifier, {user: {not: null}})
+      .then(function grabAssociatedUser(passport) {
+        return self.findOne(record.identify(passport.user));
       });
   }
 };

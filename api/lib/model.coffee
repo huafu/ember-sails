@@ -11,7 +11,7 @@ modelConstructorCache =
     @_index
   modelForConstructor: (constructor) ->
     idx = @index()
-    if (i = idx.constructors.indexOf(constructor) >= 0)
+    if (i = idx.constructors.indexOf(constructor)) >= 0
       idx.models[i]
     else
       undefined
@@ -27,10 +27,10 @@ self = module.exports =
   for: (item) ->
     if _.isString(item)
       self.forName(item)
-    else if item.prototype
-      self.forRecord(item)
-    else if (name = item?.identity)
+    else if (name = item?.globalId)
       self.forName(name)
+    else if _.isObject(item)
+      self.forRecord(item)
     else
       throw new ReferenceError('cannot get the model for ' + item)
 

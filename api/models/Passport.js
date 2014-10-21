@@ -2,6 +2,7 @@
 
 var bcrypt = require('bcryptjs');
 var record = require('../lib/record');
+var str = require('../lib/string');
 var Promise = require('bluebird');
 
 /**
@@ -20,6 +21,26 @@ function hashPassword(passport, next) {
   }
   else {
     next(null, passport);
+  }
+}
+var _knownTypes = {};
+function grabPassportType(type) {
+  var id = record.identify(type);
+  if (!id) {
+    return Promise.reject(new Error('passport type not specified'));
+  }
+  else if (!_knownTypes[id]) {
+    return PassportType.findOne(id)
+      .then(function registerPassportType(passportType) {
+        if (!passportType) {
+          return Promise.reject(new ReferenceError(str.fmt('unknown passport type `%@`', id)));
+        }
+        _knownTypes[id] = passportType;
+        return passportType;
+      });
+  }
+  else {
+    return Promise.resolve(_knownTypes[id]);
   }
 }
 
@@ -52,7 +73,7 @@ var Passport = {
      * @property protocol
      * @type String
      */
-    protocol:   { type: 'alphanumeric', required: true },
+    protocol:   { type: 'alphanumeric' },
 
     // Local field: Password
     //
@@ -114,7 +135,23 @@ var Passport = {
      * @property type
      * @type PassportType
      */
-    type: { model: 'PassportType', required: true },
+    type: {
+      model:    'PassportType',
+      required: true,
+      equals:   function (cb) {
+        var error = null,
+          type = record.identify(this.type);
+        grabPassportType(type)
+          .catch(function handleError(err) {
+            error = err;
+            return err;
+          })
+          .finally(function () {
+            cb(error ? false : type);
+          })
+          .done();
+      }
+    },
 
     /**
      * @property displayName
@@ -209,6 +246,12 @@ var Passport = {
    * @param {Function} next
    */
   beforeUpdate: function (passport, next) {
+    if (passport.identifier) {
+      return next(new Error('cannot update `identifier` field, it is read-only'));
+    }
+    if (passport.type) {
+      return next(new Error('cannot update `type` field, it is read-only'));
+    }
     hashPassword(passport, next);
   },
 
@@ -239,7 +282,6 @@ var Passport = {
    * @static
    * @param {String|PassportType} type
    * @param {String} identifier
-   * @param {Object} [update]
    * @returns {Deferred}
    */
   findOrCreateByTypeAndIdentifier: function (type, identifier, update) {
@@ -250,12 +292,7 @@ var Passport = {
       values = _.merge({}, update || {}, where);
     console.assert(identifier, 'passport identifier required');
     console.assert(type, 'passport type required');
-    return this.findOrCreate(where, values).then(function (passport) {
-      if (update && Object.keys(update).length) {
-        _.merge(passport, update);
-        return passport.save();
-      }
-    });
+    return this.findOrCreate(where, values);
   }
 };
 

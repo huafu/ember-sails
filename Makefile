@@ -38,7 +38,7 @@ tests:
 
 debug:
 	@$(call ember,build --environment $(ENV)) && \
-		$(call sails,debug $(PROD) $(VERBOSE))
+		BLUEBIRD_DEBUG=1 $(call sails,debug $(PROD) $(VERBOSE))
 
 
 #TODO: improve this so that it uses forever or such
