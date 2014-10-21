@@ -2,11 +2,11 @@ import DS from 'ember-data';
 import Ember from 'ember';
 
 export default DS.Model.extend({
-  username: DS.belongsTo('passport'),
+  username: DS.belongsTo('passport', {inverse: null}),
 
-  email: DS.belongsTo('passport'),
+  email: DS.belongsTo('passport', {inverse: null}),
 
-  avatar: DS.belongsTo('passport'),
+  avatar: DS.belongsTo('passport', {inverse: null}),
 
   passports: DS.hasMany('passport', {inverse: 'user'}),
 

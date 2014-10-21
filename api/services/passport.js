@@ -76,6 +76,9 @@ pass.connect = function (req, query, profile, next) {
   // as is the case for OpenID, for example
   provider = profile.provider || query.provider;
   identifier = query.identifier.toString();
+  // fill up our provider passport
+  providerPassport.identifier = identifier;
+  providerPassport.type = provider;
 
   // If the provider cannot be identified we cannot match it to a passport so
   // throw an error and let whoever's next in line take care of it.
@@ -96,11 +99,17 @@ pass.connect = function (req, query, profile, next) {
   // If the profile object contains a displayName...
   if (profile.hasOwnProperty('displayName') && profile.displayName) {
     providerPassport.displayName = profile.displayName;
+    user.displayName = profile.displayName;
   }
 
-  // If we got an avatar for this provider, add id
+  // If we got an avatar for this provider, add it
   if (profile.hasOwnProperty('photos') && profile.photos.length) {
     providerPassport.avatarUrl = profile.photos[0].value;
+  }
+
+  // If we got a profile URL for this provider, add it
+  if (profile.hasOwnProperty('profileUrl') && profile.profileUrl) {
+    providerPassport.profileUrl = profile.profileUrl;
   }
 
   // Get the tokens
@@ -393,7 +402,7 @@ pass.serializeUser(function (user, next) {
 });
 
 pass.deserializeUser(function (id, next) {
-  User.findOne(id).populate('passports', 'email', 'avatar', 'username').exec(next);
+  User.findOne(id).populateAll().exec(next);
 });
 
 module.exports = pass;

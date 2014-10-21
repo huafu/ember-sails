@@ -126,6 +126,11 @@ var Passport = {
      * @type String
      */
     avatarUrl:   { type: 'url' },
+    /**
+     * @property profileUrl
+     * @type String
+     */
+    profileUrl:  { type: 'url' },
 
     /**
      * Validate password used by the local strategy.

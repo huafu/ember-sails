@@ -15,13 +15,15 @@ export default DS.Model.extend({
 
   lastLocation: DS.belongsTo('geoLocation'),
 
-  user: DS.belongsTo('user'),
+  user: DS.belongsTo('user', {inverse: 'passports'}),
 
   type: DS.belongsTo('passportType'),
 
   displayName: DS.attr('string'),
 
-  avatarUrl: DS.attr('url'),
+  avatarUrl: DS.attr('string'),
+
+  profileUrl: DS.attr('string'),
 
   createdAt: DS.attr('date'),
 

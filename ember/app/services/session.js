@@ -13,7 +13,7 @@ export default Ember.Object.extend({
     this._super();
     if ((user = $meta.attr('content')) && (user = JSON.parse(user)) && user.id) {
       store = this.container.lookup('store:main');
-      model = this.container.lookup('model:user');
+      model = store.modelFor('user');
       adapter = store.adapterFor(model);
       store.pushPayload(model, adapter._newPayload(store, model, user));
       this.set('user', store.recordForId('user', user.id));
