@@ -51,10 +51,12 @@ class ModelAttribute
 
   @waterlineTypeToEmberType: (type) ->
     {
-    datetime: 'date'
-    integer:  'number'
-    float:    'number'
-    email:    'string'
+    datetime:     'date'
+    integer:      'number'
+    float:        'number'
+    email:        'string'
+    alphanumeric: 'string'
+    url:          'string'
     }[type] ? type
 
 Class = module.exports = ModelAttribute

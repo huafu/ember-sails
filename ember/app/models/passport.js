@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 
 export default DS.Model.extend({
-  protocol: DS.attr('alphanumeric'),
+  protocol: DS.attr('string'),
 
   password: DS.attr('string'),
 
