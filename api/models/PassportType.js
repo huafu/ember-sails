@@ -66,7 +66,7 @@ var PassportType = {
 
   /**
    * Creates the missing standard types
-   * @returns {Deferred}
+   * @returns {Promise}
    */
   createMissingStandardTypes: function () {
     return this.findOrCreateEach([model.primaryKeyNameFor(this)], [

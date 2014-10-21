@@ -9,7 +9,7 @@ var Promise = require('bluebird');
  * Hash a passport password.
  *
  * @private
- * @param {Object}   password
+ * @param {Passport} passport
  * @param {Function} next
  */
 function hashPassword(passport, next) {
@@ -83,7 +83,7 @@ var Passport = {
      * @property password
      * @type String
      */
-    password:   { type: 'string', minLength: 8, protected: true },
+    password:   { type: 'string', minLength: 8, 'protected': true },
 
     // Provider fields: Provider, identifier and tokens
     //
@@ -130,28 +130,12 @@ var Passport = {
      * @property user
      * @type User
      */
-    user: { model: 'User' },
+    user: { model: 'User', via: 'passports' },
     /**
      * @property type
      * @type PassportType
      */
-    type: {
-      model:    'PassportType',
-      required: true,
-      equals:   function (cb) {
-        var error = null,
-          type = record.identify(this.type);
-        grabPassportType(type)
-          .catch(function handleError(err) {
-            error = err;
-            return err;
-          })
-          .finally(function () {
-            cb(error ? false : type);
-          })
-          .done();
-      }
-    },
+    type: { model: 'PassportType', required: true },
 
     /**
      * @property displayName
@@ -174,7 +158,7 @@ var Passport = {
      *
      * @method validatePassword
      * @param {string}   password The password to validate
-     * @return {Deferred}
+     * @return {Promise}
      */
     validatePassword: function (password) {
       return new Promise(function validatePassword(resolve, reject) {
@@ -246,12 +230,12 @@ var Passport = {
    * @param {Function} next
    */
   beforeUpdate: function (passport, next) {
-    if (passport.identifier) {
-      return next(new Error('cannot update `identifier` field, it is read-only'));
-    }
-    if (passport.type) {
-      return next(new Error('cannot update `type` field, it is read-only'));
-    }
+    /*if (passport.identifier && passport.identifier !== this.identifier) {
+     return next(new Error('cannot update `identifier` field, it is read-only'));
+     }
+     if (passport.type && passport.type !== record.identify(this.passport.type)) {
+     return next(new Error('cannot update `type` field, it is read-only'));
+     }*/
     hashPassword(passport, next);
   },
 
@@ -263,7 +247,7 @@ var Passport = {
    * @param {String|PassportType} type
    * @param {String} identifier
    * @param {Object} [where]
-   * @returns {Deferred}
+   * @returns {Promise}
    */
   findByTypeAndIdentifier: function (type, identifier, where) {
     var criteria = _.merge({}, where || {}, {
@@ -282,14 +266,15 @@ var Passport = {
    * @static
    * @param {String|PassportType} type
    * @param {String} identifier
-   * @returns {Deferred}
+   * @param {Object} [createValues]
+   * @returns {Promise}
    */
-  findOrCreateByTypeAndIdentifier: function (type, identifier, update) {
+  findOrCreateByTypeAndIdentifier: function (type, identifier, createValues) {
     var where = {
         type:       record.identify(type, PassportType),
         identifier: identifier
       },
-      values = _.merge({}, update || {}, where);
+      values = _.merge({}, createValues || {}, where);
     console.assert(identifier, 'passport identifier required');
     console.assert(type, 'passport type required');
     return this.findOrCreate(where, values);

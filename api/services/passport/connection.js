@@ -97,8 +97,9 @@ var PassportConnection = function (user, provider, identifier) {
   };
 
   proto.createUserRecord = function () {
-    var self = this;
-    return User.create({})
+    var self = this, user = {};
+    user.displayName = this.passport.displayName;
+    return User.create(user)
       .then(function (user) {
         self.userRecord = user;
       });
@@ -128,7 +129,7 @@ var PassportConnection = function (user, provider, identifier) {
             console.warn('associating a passport failed silently:', results[i].reason());
           }
           else if (self.passportRecords.indexOf(passport = results[i].value()) < 0) {
-            self.passportRecords.push(record);
+            self.passportRecords.push(passport);
           }
         }
       });
@@ -149,6 +150,7 @@ var PassportConnection = function (user, provider, identifier) {
   };
 
   proto.handleError = function (error) {
+    console.warn('[passport] error in the process:', error);
     this.error = error;
     // TODO: handle each case of error to get a descriptive error
     return error;
@@ -156,4 +158,9 @@ var PassportConnection = function (user, provider, identifier) {
 
 })(PassportConnection.prototype);
 
-modules.exports = PassportConnection;
+var logger = require('../../lib/logger');
+logger.instrumentObject(
+  PassportConnection.prototype, 'PassportConnection.prototype'
+);
+
+module.exports = PassportConnection;

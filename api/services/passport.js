@@ -121,7 +121,7 @@ pass.connect = function (req, query, profile, next) {
     .catch(pc.handleError.bind(pc))
     .finally(function sendResponse() {
       if (pc.error) {
-        req.flash(pc.error);
+        req.flash('error', pc.error);
         next(pc.error);
       }
       else {
@@ -287,6 +287,7 @@ pass.loadStrategies = function () {
  *
  * @param  {Object} req
  * @param  {Object} res
+ * @param  {Function} res
  */
 pass.disconnect = function (req, res, next) {
   var passports,
@@ -326,7 +327,7 @@ pass.disconnect = function (req, res, next) {
     })
     .finally(function sendResponse() {
       if (error) {
-        req.flash(error);
+        req.flash('error', error);
         next(error);
       }
       else {

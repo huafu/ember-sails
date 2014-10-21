@@ -85,7 +85,7 @@ var User = {
      * @chainable
      */
     dissociatePassport: function (passport) {
-      var typeCode, samePk = record.isSamePrimaryKey;
+      var samePk = record.isSamePrimaryKey;
       if (samePk(this, passport.user)) {
         if (samePk(this.email, passport)) {
           throw new Error('Passport.CantDissociatePrimaryEmailPassport');
@@ -110,7 +110,7 @@ var User = {
      * @param {String|PassportType} type
      * @param {String} identifier
      * @param {Object} [values]
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     associatePassportAsync: function (type, identifier, values) {
       var self = this,
@@ -138,7 +138,7 @@ var User = {
      * @method dissociatePassportAsync
      * @param {String|PassportType} type
      * @param {String} identifier
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     dissociatePassportAsync: function (type, identifier) {
       var self = this;
@@ -160,7 +160,7 @@ var User = {
      * @param {Array<Object>} passports
      * @param {String} [promiseMethod='all']
      * @param {Boolean} [save]
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     associatePassportsAsync: function (passports, promiseMethod, save) {
       var identifier, type, values, one,
@@ -225,7 +225,7 @@ var User = {
    * @static
    * @param {PassportType|String} type
    * @param {String} identifier
-   * @returns {Deferred}
+   * @returns {Promise}
    */
   findByPassport: function (type, identifier) {
     var self = this;

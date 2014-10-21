@@ -1,4 +1,5 @@
 var validator = require('validator');
+var Promise = require('bluebird');
 
 /**
  * Local Authentication Protocol
@@ -26,6 +27,7 @@ exports.register = function (req, res, next) {
   var email = req.param('email'),
     username = req.param('username'),
     password = req.param('password'),
+    displayName = req.param('displayName'),
     user = null,
     error = null;
 
@@ -39,7 +41,12 @@ exports.register = function (req, res, next) {
     return next(new Error('No password was entered.'));
   }
 
-  User.create()
+  if (!displayName) {
+    req.flash('error', 'Error.Passport.DisplayName.Missing');
+    return next(new Error('No display name was entered.'));
+  }
+
+  User.create({ displayName: displayName })
     .then(function setUserVar(record) {
       user = record;
       return user;
@@ -74,7 +81,7 @@ exports.register = function (req, res, next) {
     })
     .finally(function sendResponse() {
       if (error) {
-        req.flash(error);
+        req.flash('error', error);
         next(error);
       }
       else {
@@ -101,7 +108,7 @@ exports.connect = function (req, res, next) {
     email = req.param('email'),
     error = null;
 
-  user.associatePassportAsync(PassportTpye.EMAIL, email, {protocol: 'local', password: password})
+  user.associatePassportAsync(PassportType.EMAIL, email, {protocol: 'local', password: password})
     .then(function savePassport(passport) {
       return passport.save();
     })
@@ -114,7 +121,7 @@ exports.connect = function (req, res, next) {
     })
     .finally(function sendResponse() {
       if (error) {
-        req.flash(error);
+        req.flash('error', error);
         next(error);
       }
       else {
@@ -151,7 +158,7 @@ exports.login = function (req, identifier, password, next) {
   }
 
   User
-    .findByPassport(isEmail ? PassportTpye.EMAIL : PassportType.USERNAME, identifier)
+    .findByPassport(isEmail ? PassportType.EMAIL : PassportType.USERNAME, identifier)
     .then(function checkUserPassword(user) {
       if (!user) {
         if (isEmail) {
@@ -173,7 +180,7 @@ exports.login = function (req, identifier, password, next) {
     })
     .finally(function sendResponse() {
       if (error) {
-        req.flash(error);
+        req.flash('error', error);
         next(error);
       }
       else {
