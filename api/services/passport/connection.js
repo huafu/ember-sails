@@ -54,7 +54,7 @@ var PassportConnection = function (user, provider, identifier) {
     // If the profile object contains a list of emails...
     if (profile.hasOwnProperty('emails') && profile.emails.length) {
       for (var i = 0; i < profile.emails.length; i++) {
-        this.profiles.push({
+        this.passports.push({
           type:       PassportType.EMAIL,
           identifier: profile.emails[i].value
         });

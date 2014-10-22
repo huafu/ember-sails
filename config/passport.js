@@ -20,41 +20,43 @@ module.exports.passport = {
   },
 
   twitter: {
-    name: 'Twitter',
+    name:     'Twitter',
     protocol: 'oauth',
     strategy: require('passport-twitter').Strategy,
-    options: {
-      consumerKey: 'your-consumer-key',
+    options:  {
+      consumerKey:    'your-consumer-key',
       consumerSecret: 'your-consumer-secret'
     }
   },
 
   github: {
-    name: 'GitHub',
+    name:     'GitHub',
     protocol: 'oauth2',
     strategy: require('passport-github').Strategy,
-    options: {
-      clientID: 'your-client-id',
+    scope:    [ 'user'/*, 'gist'*/ ],
+    options:  {
+      clientID:     'your-client-id',
       clientSecret: 'your-client-secret'
     }
   },
 
   facebook: {
-    name: 'Facebook',
+    name:     'Facebook',
     protocol: 'oauth2',
     strategy: require('passport-facebook').Strategy,
-    options: {
-      clientID: 'your-client-id',
+    scope:    ['email'],
+    options:  {
+      clientID:     'your-client-id',
       clientSecret: 'your-client-secret'
     }
   },
 
   google: {
-    name: 'Google',
+    name:     'Google',
     protocol: 'oauth2',
     strategy: require('passport-google-oauth').OAuth2Strategy,
-    options: {
-      clientID: 'your-client-id',
+    options:  {
+      clientID:     'your-client-id',
       clientSecret: 'your-client-secret'
     }
   }
