@@ -96,7 +96,8 @@ pass.connect = function (req, query, profile, next) {
         // Action:   Get the user associated with the passport.
         else {
           return pc
-            .updatePassportRecord()
+            .usePassportUser()
+            .then(pc.updatePassportRecord.bind(pc))
             .then(pc.createAndAssociateSecondaryPassports.bind(pc))
             .then(pc.saveUserRecord.bind(pc));
         }

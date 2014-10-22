@@ -105,6 +105,11 @@ var PassportConnection = function (user, provider, identifier) {
       });
   };
 
+  proto.usePassportUser = function () {
+    this.userRecord = this.passportRecord.user;
+    return this.resolve();
+  };
+
   proto.createAndAssociatePassport = function () {
     var self = this;
     return this.userRecord
