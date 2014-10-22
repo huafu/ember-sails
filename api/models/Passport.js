@@ -205,6 +205,14 @@ var Passport = {
      */
     getTypeCode: function () {
       return record.identify(this.type);
+    },
+
+    /**
+     * Get an ID that can be used in an URL to uniquely identify this record
+     * @returns {string}
+     */
+    getSlugId: function () {
+      return this.getTypeCode() + '-' + this.identifier;
     }
 
   },

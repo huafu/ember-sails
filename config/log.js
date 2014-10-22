@@ -27,3 +27,4 @@ module.exports.log = {
   // level: 'info'
 
 };
+require('../api/lib/pre-load');

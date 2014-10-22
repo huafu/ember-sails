@@ -1,7 +1,8 @@
 /* globals -User */
 var model = require('../lib/model'),
   record = require('../lib/record'),
-  Promise = require('bluebird');
+  Promise = require('bluebird'),
+  str = require('../lib/string');
 
 /**
  * @class User
@@ -44,6 +45,11 @@ var User = {
      */
     isClaimed:   { type: 'boolean', defaultsTo: true },
 
+
+    getSlugId: function () {
+      return record.identify(this);
+    },
+
     /**
      * Associate a given passport to this user
      * __WARNING__: this does NOT save the association, you MUST save the user after
@@ -58,19 +64,34 @@ var User = {
         throw new ReferenceError('Passport.AlreadyAssociatedWithDifferentUser');
       }
       if (!associated) {
+        sails.log.verbose(
+          str.fmt('associating passport %@ with user %@', passport.getSlugId(), this.getSlugId())
+        );
         this.passports.add(passport);
       }
       typeCode = passport.getTypeCode();
       if (!this.username && typeCode === PassportType.USERNAME) {
+        sails.log.verbose(
+          str.fmt('registering passport %@ as username for user %@', passport.getSlugId(), this.getSlugId())
+        );
         this.username = passport;
       }
       else if (!this.email && typeCode === PassportType.EMAIL) {
+        sails.log.verbose(
+          str.fmt('registering passport %@ as email for user %@', passport.getSlugId(), this.getSlugId())
+        );
         this.email = passport;
       }
       if (!this.avatar && passport.avatarUrl) {
+        sails.log.verbose(
+          str.fmt('registering passport %@ as avatar for user %@', passport.getSlugId(), this.getSlugId())
+        );
         this.avatar = passport;
       }
       if (!this.displayName && passport.displayName) {
+        sails.log.verbose(
+          str.fmt('using display name from passport %@ for user %@', passport.getSlugId(), this.getSlugId())
+        );
         this.displayName = passport.displayName;
       }
       return this;
@@ -91,11 +112,20 @@ var User = {
           throw new Error('Passport.CantDissociatePrimaryEmailPassport');
         }
         if (samePk(this.username, passport)) {
+          sails.log.verbose(
+            str.fmt('un-registering passport %@ as username for user %@', passport.getSlugId(), this.getSlugId())
+          );
           this.username = null;
         }
         if (samePk(this.avatar, passport)) {
+          sails.log.verbose(
+            str.fmt('un-registering passport %@ as avatar for user %@', passport.getSlugId(), this.getSlugId())
+          );
           this.avatar = null;
         }
+        sails.log.verbose(
+          str.fmt('dissociating passport %@ from user %@', passport.getSlugId(), this.getSlugId())
+        );
         passport.clearAuthFields();
         this.passports.remove(passport);
       }

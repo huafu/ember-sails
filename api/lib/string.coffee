@@ -24,6 +24,8 @@ self = module.exports =
 
   fmt: (str, args...) ->
     autoIndex = 0
+    if args.length is 1 and typeof args[0] instanceof Array
+      args = args[0]
     str.replace /%@([0-9]+)?/g, (all, index) ->
       if index
         index = parseInt(index, 10) - 1

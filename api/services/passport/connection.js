@@ -6,23 +6,26 @@ var Promise = require('bluebird');
 var model = require('../../lib/model');
 
 var PassportConnection = function (user, provider, identifier) {
-  this.passport = {
-    identifier: identifier,
-    provider:   provider
-  };
-  this.passports = [];
-  this.passportRecords = [];
   this.userRecord = user || null;
-  this.passportRecord = null;
-  this.error = null;
   this.provider = provider;
   this.identifier = identifier;
+  this.passport = null;
+  this.passports = null;
+  this.passportRecords = null;
+  this.passportRecord = null;
+  this.error = null;
 };
 (function (proto) {
 
   proto.start = function () {
     this.error = null;
     this.passportRecords = [];
+    this.passportRecord = null;
+    this.passports = [];
+    this.passport = {
+      identifier: this.identifier,
+      provider:   this.provider
+    };
     return this.resolve();
   };
 
@@ -50,9 +53,12 @@ var PassportConnection = function (user, provider, identifier) {
   proto.parseProfile = function (profile) {
     // If the profile object contains a list of emails...
     if (profile.hasOwnProperty('emails') && profile.emails.length) {
-      this.passports.push.apply(this.passports, _.map(profile.emails, function (email) {
-        return {type: PassportType.EMAIL, identifier: email.value};
-      }));
+      for (var i = 0; i < profile.emails.length; i++) {
+        this.profiles.push({
+          type:       PassportType.EMAIL,
+          identifier: profile.emails[i].value
+        });
+      }
     }
     // If the profile object contains a username...
     if (profile.hasOwnProperty('username') && profile.username) {
@@ -163,9 +169,5 @@ var PassportConnection = function (user, provider, identifier) {
 
 })(PassportConnection.prototype);
 
-var logger = require('../../lib/logger');
-logger.instrumentObject(
-  PassportConnection.prototype, 'PassportConnection.prototype'
-);
 
 module.exports = PassportConnection;
