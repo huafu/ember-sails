@@ -10,6 +10,7 @@
  * http://sailsjs.org/#/documentation/concepts/Logging
  */
 
+require('../api/lib/pre-load');
 module.exports.log = {
 
   /***************************************************************************
@@ -27,4 +28,3 @@ module.exports.log = {
   // level: 'info'
 
 };
-require('../api/lib/pre-load');

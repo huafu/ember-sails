@@ -59,7 +59,7 @@ var User = {
      * @chainable
      */
     associatePassport: function (passport) {
-      var associated, typeCode;
+      var associated;
       if (passport.user && !(associated = record.isSamePrimaryKey(this, passport.user))) {
         throw new ReferenceError('Passport.AlreadyAssociatedWithDifferentUser');
       }
@@ -67,32 +67,7 @@ var User = {
         sails.log.verbose(
           str.fmt('associating passport %@ with user %@', passport.getSlugId(), this.getSlugId())
         );
-        this.passports.add(passport);
-      }
-      typeCode = passport.getTypeCode();
-      if (!this.username && typeCode === PassportType.USERNAME) {
-        sails.log.verbose(
-          str.fmt('registering passport %@ as username for user %@', passport.getSlugId(), this.getSlugId())
-        );
-        this.username = passport;
-      }
-      else if (!this.email && typeCode === PassportType.EMAIL) {
-        sails.log.verbose(
-          str.fmt('registering passport %@ as email for user %@', passport.getSlugId(), this.getSlugId())
-        );
-        this.email = passport;
-      }
-      if (!this.avatar && passport.avatarUrl) {
-        sails.log.verbose(
-          str.fmt('registering passport %@ as avatar for user %@', passport.getSlugId(), this.getSlugId())
-        );
-        this.avatar = passport;
-      }
-      if (!this.displayName && passport.displayName) {
-        sails.log.verbose(
-          str.fmt('using display name from passport %@ for user %@', passport.getSlugId(), this.getSlugId())
-        );
-        this.displayName = passport.displayName;
+        passport.user = record.identify(this);
       }
       return this;
     },
@@ -127,7 +102,7 @@ var User = {
           str.fmt('dissociating passport %@ from user %@', passport.getSlugId(), this.getSlugId())
         );
         passport.clearAuthFields();
-        this.passports.remove(passport);
+        passport.user = null;
       }
       return this;
     },
@@ -139,17 +114,23 @@ var User = {
      * @method associatePassportAsync
      * @param {String|PassportType} type
      * @param {String} identifier
-     * @param {Object} [values]
+     * @param {Object} [extra]
      * @returns {Promise}
      */
-    associatePassportAsync: function (type, identifier, values) {
+    associatePassportAsync: function (type, identifier, extra) {
       var self = this,
-        excluded = ['identifier', 'type', model.primaryKeyNameFor(Passport)];
+        excluded = ['identifier', 'type', model.primaryKeyNameFor(Passport)],
+        values = _.merge({}, extra || {}, {user: record.identify(this)});
+      sails.log.verbose(
+        str.fmt(
+          'trying to associate passport %@ with user %@',
+          Passport.computeSlugId(type, identifier), this.getSlugId()
+        )
+      );
       return Passport.findOrCreateByTypeAndIdentifier(type, identifier, values)
-        .populateAll()
         .then(function updatePassportProperties(passport) {
           for (var k in values) {
-            if (excluded.indexOf(k) < 0 && values.hasOwnProperty(k)) {
+            if (k !== 'user' && excluded.indexOf(k) < 0 && values.hasOwnProperty(k)) {
               passport[k] = values[k];
             }
           }
@@ -172,6 +153,12 @@ var User = {
      */
     dissociatePassportAsync: function (type, identifier) {
       var self = this;
+      sails.log.verbose(
+        str.fmt(
+          'trying to dissociate passport %@ with user %@',
+          Passport.computeSlugId(type, identifier), this.getSlugId()
+        )
+      );
       return Passport.findByTypeAndIdentifier(type, identifier, {user: record.identify(this)})
         .then(function dissociatePassport(passport) {
           if (passport) {
@@ -215,7 +202,6 @@ var User = {
           this
             .associatePassportAsync(type, identifier, values)
             .then(savePassport)
-            .done()
         );
       }
       return Promise[promiseMethod || 'all'](promises);
@@ -245,6 +231,44 @@ var User = {
     populatedPassports: function (type) {
       console.assert(type, 'passport type required');
       return _.filter(this.passports, {type: record.identify(type, PassportType)});
+    },
+
+    /**
+     * Complete our user using the given passport if there are any missing information
+     * @param {Passport} passport
+     * @chainable
+     */
+    completeFromPassport: function (passport) {
+      var typeCode = passport.getTypeCode(),
+        passportId = record.identify(passport);
+      if (!record.isSamePrimaryKey(passport.user, this)) {
+        throw new Error('Passport.UserDoNotOwnPassport');
+      }
+      if (!this.username && typeCode === PassportType.USERNAME) {
+        sails.log.verbose(
+          str.fmt('registering passport %@ as username for user %@', passport.getSlugId(), this.getSlugId())
+        );
+        this.username = passportId;
+      }
+      else if (!this.email && typeCode === PassportType.EMAIL) {
+        sails.log.verbose(
+          str.fmt('registering passport %@ as email for user %@', passport.getSlugId(), this.getSlugId())
+        );
+        this.email = passportId;
+      }
+      if (!this.avatar && passport.avatarUrl) {
+        sails.log.verbose(
+          str.fmt('registering passport %@ as avatar for user %@', passport.getSlugId(), this.getSlugId())
+        );
+        this.avatar = passportId;
+      }
+      if (!this.displayName && passport.displayName) {
+        sails.log.verbose(
+          str.fmt('using display name from passport %@ for user %@', passport.getSlugId(), this.getSlugId())
+        );
+        this.displayName = passport.displayName;
+      }
+      return this;
     }
   },
 

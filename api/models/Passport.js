@@ -212,7 +212,7 @@ var Passport = {
      * @returns {string}
      */
     getSlugId: function () {
-      return this.getTypeCode() + '-' + this.identifier;
+      return Passport.computeSlugId(this.getTypeCode(), this.identifier);
     }
 
   },
@@ -238,14 +238,17 @@ var Passport = {
    * @param {Function} next
    */
   beforeUpdate: function (passport, next) {
-    /*if (passport.identifier && passport.identifier !== this.identifier) {
-     return next(new Error('cannot update `identifier` field, it is read-only'));
-     }
-     if (passport.type && passport.type !== record.identify(this.passport.type)) {
-     return next(new Error('cannot update `type` field, it is read-only'));
-     }*/
     hashPassword(passport, next);
   },
+
+//  beforeValidate: function (passport, next) {
+//    console.log('before validate', passport);
+//    next(null, passport);
+//  },
+//  afterValidate:  function (passport, next) {
+//    console.log('after validate', passport);
+//    next(null, passport);
+//  },
 
   /**
    * Finds a passport by type and identifier
@@ -283,9 +286,22 @@ var Passport = {
         identifier: identifier
       },
       values = _.merge({}, createValues || {}, where);
+    if (values.user) {
+      values.user = record.identify(values.user);
+    }
     console.assert(identifier, 'passport identifier required');
     console.assert(type, 'passport type required');
     return this.findOrCreate(where, values);
+  },
+
+  /**
+   * Compute a slug ID from a passport type and identifier
+   * @param {String} type
+   * @param {String} identifier
+   * @returns {string}
+   */
+  computeSlugId: function (type, identifier) {
+    return type + '-' + identifier;
   }
 };
 

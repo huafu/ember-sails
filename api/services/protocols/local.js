@@ -159,6 +159,7 @@ exports.login = function (req, identifier, password, next) {
 
   User
     .findByPassport(isEmail ? PassportType.EMAIL : PassportType.USERNAME, identifier)
+    .populate('email')
     .then(function checkUserPassword(user) {
       if (!user) {
         if (isEmail) {
@@ -169,7 +170,6 @@ exports.login = function (req, identifier, password, next) {
         }
       }
       else {
-        // email has been populated automatically by `User.findByPassport`
         userRecord = user;
         return user.email.validatePassword(password);
       }

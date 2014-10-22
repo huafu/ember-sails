@@ -11,7 +11,9 @@ logger.instrumentObjects({
   'service:passport':             require('../services/passport'),
   'controller:auth':              require('../controllers/AuthController'),
   'model:user':                   require('../models/User'),
-  'model:user.prototype':         require('../models/User').attributes
+  'model:user.prototype':         require('../models/User').attributes,
+  'model:passport':               require('../models/Passport'),
+  'model:passport.prototype':     require('../models/Passport').attributes
 });
 /////////////////////////////////////////
 

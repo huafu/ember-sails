@@ -7,7 +7,7 @@ var model = require('../../lib/model');
 
 var PassportConnection = function (user, provider, identifier) {
   this.userRecord = user || null;
-  this.provider = provider;
+  this.type = provider;
   this.identifier = identifier;
   this.passport = null;
   this.passports = null;
@@ -24,7 +24,7 @@ var PassportConnection = function (user, provider, identifier) {
     this.passports = [];
     this.passport = {
       identifier: this.identifier,
-      provider:   this.provider
+      type:       this.type
     };
     return this.resolve();
   };
@@ -38,7 +38,7 @@ var PassportConnection = function (user, provider, identifier) {
     return new Promise(function (resolve, reject) {
       // If the provider cannot be identified we cannot match it to a passport so
       // throw an error and let whoever's next in line take care of it.
-      if (!self.provider) {
+      if (!self.type) {
         reject(new Error('No authentication provider given.'));
       }
       else if (!self.identifier) {
@@ -95,8 +95,7 @@ var PassportConnection = function (user, provider, identifier) {
   proto.lookupPassportRecord = function () {
     var self = this;
     return Passport
-      .findByTypeAndIdentifier(this.provider, this.identifier)
-      .populate('user')
+      .findByTypeAndIdentifier(this.type, this.identifier)
       .then(function setPassportRecordProperty(passport) {
         self.passportRecord = passport;
       });
@@ -119,7 +118,7 @@ var PassportConnection = function (user, provider, identifier) {
   proto.createAndAssociatePassport = function () {
     var self = this;
     return this.userRecord
-      .associatePassportAsync(this.provider, this.identifier, this.passport)
+      .associatePassportAsync(this.type, this.identifier, this.passport)
       .then(function saveMainPassport(passport) {
         return passport.save();
       })
@@ -133,14 +132,16 @@ var PassportConnection = function (user, provider, identifier) {
     // here we don't care if some are failing, our main one is saved already
     return this.userRecord
       .associatePassportsAsync(this.passports, 'settle', true)
-      .then(function setPassportRecordsProperty(results) {
+      .then(function setPassportRecordsPropertyAndCompleteUser(results) {
         var passport;
         for (var i = 0; i < results.length; i++) {
           if (results[i].isRejected()) {
             console.warn('associating a passport failed silently:', results[i].reason());
           }
-          else if (self.passportRecords.indexOf(passport = results[i].value()) < 0) {
+          else {
+            passport = results[i].value();
             self.passportRecords.push(passport);
+            self.userRecord.completeFromPassport(passport);
           }
         }
       });
