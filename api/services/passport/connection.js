@@ -4,6 +4,7 @@
 
 var Promise = require('bluebird');
 var model = require('../../lib/model');
+var record = require('../../lib/record');
 
 var PassportConnection = function (user, provider, identifier) {
   this.userRecord = user || null;
@@ -141,8 +142,19 @@ var PassportConnection = function (user, provider, identifier) {
           else {
             passport = results[i].value();
             self.passportRecords.push(passport);
-            self.userRecord.completeFromPassport(passport);
           }
+        }
+      });
+  };
+
+  proto.reloadAndCompleteUser = function () {
+    var self = this;
+    return User.findOne(record.identify(this.userRecord))
+      .then(function completeUserWithAllPassports(user) {
+        self.userRecord = user;
+        user.completeFromPassport(self.passportRecord);
+        for (var i = 0; i < self.passportRecords.length; i++) {
+          user.completeFromPassport(self.passportRecords[i]);
         }
       });
   };

@@ -89,6 +89,7 @@ pass.connect = function (req, query, profile, next) {
             .createUserRecord()
             .then(pc.createAndAssociatePassport.bind(pc))
             .then(pc.createAndAssociateSecondaryPassports.bind(pc))
+            .then(pc.reloadAndCompleteUser.bind(pc))
             .then(pc.saveUserRecord.bind(pc));
         }
         // Scenario: An existing user is trying to log in using an already
@@ -99,6 +100,7 @@ pass.connect = function (req, query, profile, next) {
             .usePassportUser()
             .then(pc.updatePassportRecord.bind(pc))
             .then(pc.createAndAssociateSecondaryPassports.bind(pc))
+            .then(pc.reloadAndCompleteUser.bind(pc))
             .then(pc.saveUserRecord.bind(pc));
         }
       }
@@ -110,6 +112,7 @@ pass.connect = function (req, query, profile, next) {
           return pc
             .createAndAssociatePassport()
             .then(pc.createAndAssociateSecondaryPassports.bind(pc))
+            .then(pc.reloadAndCompleteUser.bind(pc))
             .then(pc.saveUserRecord.bind(pc));
         }
         // Scenario: The user is a nutjob or spammed the back-button.
