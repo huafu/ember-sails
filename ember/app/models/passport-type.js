@@ -8,5 +8,12 @@ export default DS.Model.extend({
 
   updatedAt: DS.attr('date'),
 
-  recordLabel: Ember.computed.alias('label')
+  recordLabel: Ember.computed.alias('label'),
+
+  code:    Ember.computed.oneWay('id'),
+
+  // TODO: send this from the backend without storing it in the DB
+  authUrl: function () {
+    return '/auth/' + this.get('code');
+  }.property('code').readOnly()
 });

@@ -2,11 +2,12 @@
 
 module.exports = function (environment) {
   var ENV = {
-    modulePrefix: 'ember-sails',
-    environment:  environment,
-    baseURL:      '/',
-    locationType: 'auto',
-    EmberENV:     {
+    modulePrefix:    'ember-sails',
+    podModulePrefix: 'ember-sails/pods',
+    environment:     environment,
+    baseURL:         '/',
+    locationType:    'auto',
+    EmberENV:        {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build
         // e.g. 'with-controller': true

@@ -6,7 +6,7 @@ export default Ember.Controller.extend({
   zoom:    5,
   type:    'road',
   markers: [
-    Ember.Object.create({title: 'one', lat: 5, lng: 5}),
-    Ember.Object.create({title: 'two', lat: 5, lng: 0})
+    {title: 'one', lat: 5, lng: 5},
+    {title: 'two', lat: 5, lng: 0}
   ]
 });

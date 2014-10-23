@@ -1,35 +1,72 @@
-<nav class="top-bar" data-topbar role="navigation">
+<ul class="title-area">
+  <li class="name">
+    <h1>
+      {{#link-to 'application'}}
+        {{app.name}}
+      {{/link-to}}
+    </h1>
+  </li>
+  <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+  <li class="toggle-topbar menu-icon">
+    <a href="#"><span>Menu</span></a>
+  </li>
+</ul>
 
-  <ul class="title-area">
-    <li class="name">
-      <h1><a href="#">{{app.name}}</a></h1>
+<section class="top-bar-section">
+  <ul class="right">
+
+    <li class="divider"></li>
+
+    <li class="has-dropdown not-click">
+
+      <a href="javascript://">
+        {{#if session.user}}
+          {{user-avatar subject=session.user class='size-24'}}
+          {{session.user.displayName}}
+        {{else}}
+          Login&nbsp;/&nbsp;Sign–up
+        {{/if}}
+      </a>
+
+      <ul class="dropdown">
+        {{#if session.user}}
+          <li>
+            <label>Linked accounts:</label>
+          </li>
+          {{#each sessionUserPassports}}
+            <li>
+              <a href="javascript://">
+                {{passport-icon subject=this class='right'}}
+                {{user-avatar subject=this}} {{this.displayName}}
+              </a>
+            </li>
+          {{/each}}
+        {{/if}}
+        <li class="row">
+          <label>
+            {{#if session.user}}
+              Link another account:
+            {{else}}
+              Login/sign-up using:
+            {{/if}}
+          </label>
+        </li>
+        <li>
+          <div class="no-wrap">
+            {{#each passportTypes}}
+              <a {{bind-attr href=authUrl}} class="button tiny">
+                {{passport-icon subject=this}}
+              </a>
+            {{/each}}
+          </div>
+        </li>
+        {{#if session.user}}
+          <li>
+            <a href="/logout">Logout</a>
+          </li>
+        {{/if}}
+      </ul>
+
     </li>
-    <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
-    <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
   </ul>
-
-  <section class="top-bar-section">
-    <ul class="right">
-      <li>
-        <a href="/auth/facebook" title="Login with Facebook">
-          <i class="fi-social-facebook"></i>
-        </a>
-      </li>
-      <li>
-        <a href="/auth/twitter" title="Login with Twitter">
-          <i class="fi-social-twitter"></i>
-        </a>
-      </li>
-      <li>
-        <a href="/auth/google" title="Login with Google+">
-          <i class="fi-social-google-plus"></i>
-        </a>
-      </li>
-      <li>
-        <a href="/auth/facebook" title="Login with GitHub">
-          <i class="fi-social-github"></i>
-        </a>
-      </li>
-    </ul>
-  </section>
-</nav>
+</section>

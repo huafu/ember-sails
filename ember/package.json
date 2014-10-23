@@ -30,7 +30,9 @@
     "ember-data": "1.0.0-beta.10",
     "ember-data-sails": "~0.0.3z",
     "ember-foundation": "^0.1.0",
+    "ember-google-map": "0.0.4",
     "express": "^4.8.5",
-    "glob": "^4.0.5"
+    "glob": "^4.0.5",
+    "with-style-mixin": "0.0.1"
   }
 }

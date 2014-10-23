@@ -1,17 +1,6 @@
-<div class="off-canvas-wrap" data-offcanvas>
-  <div class="inner-wrap">
-    {{render 'topbar'}}
+{{render 'topbar'}}
 
-    {{render 'off-canvas-left'}}
-
-    {{!render 'off-canvas-right'}}
-
-    <section class="main-section">
-      {{outlet}}
-      {{!render 'tests/map'}}
-    </section>
-
-    <a class="exit-off-canvas"></a>
-
-  </div>
-</div>
+<section class="scroll-container" role="main">
+  {{outlet}}
+  {{!render 'tests/map'}}
+</section>

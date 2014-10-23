@@ -3,7 +3,7 @@ import {
   test
 } from 'ember-qunit';
 
-moduleForComponent('google-map', 'GoogleMapComponent', {
+moduleForComponent('user-avatar', 'UserAvatarComponent', {
   // specify the other units that are required for this test
   // needs: ['component:foo', 'helper:bar']
 });

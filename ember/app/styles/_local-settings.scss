@@ -1,0 +1,36 @@
+// social network colors
+$facebook-color: #2F448A;
+$twitter-color: #4298ED;
+$google-color: #CB2B1C;
+$github-color: #26639B;
+
+@mixin social-colors($lighten: 0) {
+  &.facebook {
+    color: lighten($facebook-color, $lighten);
+  }
+  &.twitter {
+    color: lighten($twitter-color, $lighten);
+  }
+  &.google {
+    color: lighten($google-color, $lighten);
+  }
+  &.github {
+    color: lighten($github-color, $lighten);
+  }
+}
+
+
+@mixin social-colors-glow($lighten: 20%) {
+  &.facebook {
+    text-shadow: 0px 0px 2px lighten($facebook-color, $lighten);
+  }
+  &.twitter {
+    text-shadow: 0px 0px 2px lighten($twitter-color, $lighten);
+  }
+  &.google {
+    text-shadow: 0px 0px 2px lighten($google-color, $lighten);
+  }
+  &.github {
+    text-shadow: 0px 0px 2px lighten($github-color, $lighten);
+  }
+}

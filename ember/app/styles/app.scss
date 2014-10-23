@@ -1,6 +1,7 @@
 $fi-path: "../foundation-icon-fonts";
 
 @import "settings";
+@import "local-settings";
 @import "ember-foundation";
 @import "../../bower_components/foundation-icon-fonts/foundation-icons";
 
@@ -8,3 +9,27 @@ $fi-path: "../foundation-icon-fonts";
 
 @import "google-map";
 @import "admin";
+
+img.user-avatar, .size-24 {
+  height: 24px;
+  width: 24px;
+}
+
+i.passport-icon {
+  @include social-colors();
+}
+
+nav.top-bar {
+  img.user-avatar {
+    background-color: #fff;
+    border-radius: 3px;
+    box-shadow: 0px 0px 1px #fff;
+  }
+  i.passport-icon {
+    @include social-colors(10%);
+    @include social-colors-glow();
+  }
+  a.button:hover i.passport-icon {
+    @include social-colors(30%);
+  }
+}

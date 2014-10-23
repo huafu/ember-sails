@@ -27,7 +27,12 @@ export default DS.Model.extend({
 
   createdAt: DS.attr('date'),
 
-  updatedAt: DS.attr('date'),
+  updatedAt:     DS.attr('date'),
+
+  // TODO: send this from the backend without storing it in the DB
+  disconnectUrl: function () {
+    return '/auth/' + this.get('type.code') + '/disconnect/' + encodeURIComponent(this.get('identifier'));
+  }.property('type.code', 'identifier').readOnly(),
 
   recordLabel: function () {
     return '%@#%@'.fmt(this.get('type.id'), this.get('identifier'));

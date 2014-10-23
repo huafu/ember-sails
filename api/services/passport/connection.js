@@ -74,6 +74,12 @@ var PassportConnection = function (user, provider, identifier) {
     if (profile.hasOwnProperty('photos') && profile.photos.length) {
       this.passport.avatarUrl = profile.photos[0].value;
     }
+    else {
+      // try to handle known URL from providers
+      if (this.type === PassportType.FACEBOOK) {
+        this.passport.avatarUrl = 'https://graph.facebook.com/' + this.identifier + '/picture?type=normal';
+      }
+    }
 
     // If we got a profile URL for this provider, add it
     if (profile.hasOwnProperty('profileUrl') && profile.profileUrl) {
@@ -112,7 +118,14 @@ var PassportConnection = function (user, provider, identifier) {
   };
 
   proto.usePassportUser = function () {
+    var self = this;
     this.userRecord = this.passportRecord.user;
+    if (!_.isObject(this.userRecord)) {
+      return User.findOne(this.userRecord)
+        .then(function setUserRecordProperty(user) {
+          self.userRecord = user;
+        });
+    }
     return this.resolve();
   };
 

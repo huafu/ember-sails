@@ -33,7 +33,7 @@ logger =
         res = method.apply @, arguments
       catch err
         logger._warn "[logger] !! #{ name } threw #{ err }"
-        err.captureStackTrace()
+        err.captureStackTrace?()
         throw err
       logger._debug "[logger] <#{ arrow }= exiting #{ name }"
       res
