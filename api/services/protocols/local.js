@@ -54,13 +54,21 @@ exports.register = function (req, res, next) {
     .then(function associateEmailPassport() {
       return user
         .associatePassportAsync(PassportType.EMAIL, email, {protocol: 'local', password: password})
-        .save();
+        .then(function setLastLoginDate(passport) {
+          passport.lastLoginAt = new Date();
+          return passport;
+        })
+        .then(function savePassport() {
+          return passport.save();
+        });
     })
     .then(function associateUsernamePassport() {
       if (username) {
         return user
           .associatePassportAsync(PassportType.USERNAME, username)
-          .save();
+          .then(function saveUsernamePassport(passport) {
+            return passport.save();
+          });
       }
     })
     .then(function saveUser() {
@@ -110,6 +118,7 @@ exports.connect = function (req, res, next) {
 
   user.associatePassportAsync(PassportType.EMAIL, email, {protocol: 'local', password: password})
     .then(function savePassport(passport) {
+      passport.lasLoginAt = new Date();
       return passport.save();
     })
     .then(function saveUser() {
@@ -171,8 +180,13 @@ exports.login = function (req, identifier, password, next) {
       }
       else {
         userRecord = user;
-        return user.email.validatePassword(password);
+        user.email.validatePassword(password);
       }
+      return user;
+    })
+    .then(function updateLastLogin(user) {
+      user.email.lastLoginAt = new Date();
+      return user.email.save();
     })
     .catch(function handleError(err) {
       error = err;

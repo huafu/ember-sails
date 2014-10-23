@@ -9,9 +9,7 @@ export default DS.Model.extend({
 
   tokens: DS.attr('json'),
 
-  lastLogin: DS.attr('date'),
-
-  lastLogout: DS.attr('date'),
+  lastLoginAt: DS.attr('date'),
 
   lastLocation: DS.belongsTo('geoLocation'),
 

@@ -134,6 +134,7 @@ var PassportConnection = function (user, provider, identifier) {
     return this.userRecord
       .associatePassportAsync(this.type, this.identifier, this.passport)
       .then(function saveMainPassport(passport) {
+        passport.lastLoginAt = new Date();
         return passport.save();
       })
       .then(function setPassportRecordProperty(passport) {
@@ -183,6 +184,7 @@ var PassportConnection = function (user, provider, identifier) {
         this.passportRecord[k] = this.passport[k];
       }
     }
+    this.passportRecord.lastLoginAt = new Date();
     return this.passportRecord.save();
   };
 

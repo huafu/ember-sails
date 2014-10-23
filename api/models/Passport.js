@@ -111,15 +111,10 @@ var Passport = {
     tokens:     { type: 'json' },
 
     /**
-     * @property lastLogin
+     * @property lastLoginAt
      * @type Date
      */
-    lastLogin:    { type: 'datetime' },
-    /**
-     * @property lastLogout
-     * @type Date
-     */
-    lastLogout:   { type: 'datetime' },
+    lastLoginAt:    { type: 'datetime' },
     /**
      * @property lastLocation
      * @type GeoLocation
