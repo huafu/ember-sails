@@ -5,6 +5,7 @@
 var Promise = require('bluebird');
 var model = require('../../lib/model');
 var record = require('../../lib/record');
+var validator = require('validator');
 
 var PassportConnection = function (user, provider, identifier) {
   this.userRecord = user || null;
@@ -55,10 +56,12 @@ var PassportConnection = function (user, provider, identifier) {
     // If the profile object contains a list of emails...
     if (profile.hasOwnProperty('emails') && profile.emails.length) {
       for (var i = 0; i < profile.emails.length; i++) {
-        this.passports.push({
-          type:       PassportType.EMAIL,
-          identifier: profile.emails[i].value
-        });
+        if (validator.isEmail(profile.emails[i].value)) {
+          this.passports.push({
+            type:       PassportType.EMAIL,
+            identifier: profile.emails[i].value
+          });
+        }
       }
     }
     // If the profile object contains a username...
@@ -74,6 +77,14 @@ var PassportConnection = function (user, provider, identifier) {
     if (profile.hasOwnProperty('photos') && profile.photos.length) {
       this.passport.avatarUrl = profile.photos[0].value;
     }
+    else if (profile._json && profile._json.avatar_url) {
+      // github
+      this.passport.avatarUrl = profile._json.avatar_url;
+    }
+    else if (profile._json && profile._json.picture) {
+      // google+
+      this.passport.avatarUrl = profile._json.picture;
+    }
     else {
       // try to handle known URL from providers
       if (this.type === PassportType.FACEBOOK) {
@@ -84,6 +95,10 @@ var PassportConnection = function (user, provider, identifier) {
     // If we got a profile URL for this provider, add it
     if (profile.hasOwnProperty('profileUrl') && profile.profileUrl) {
       this.passport.profileUrl = profile.profileUrl;
+    }
+    else if (profile._json && profile._json.link) {
+      // google+
+      this.passport.profileUrl = profile._json.link;
     }
   };
 

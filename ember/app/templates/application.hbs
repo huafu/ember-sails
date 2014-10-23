@@ -3,4 +3,38 @@
 <section class="scroll-container" role="main">
   {{outlet}}
   {{!render 'tests/map'}}
+
+  <div class="row">
+    <div class="small-12">
+      <h3>My identities:</h3>
+      <table>
+        <thead>
+        <tr>
+          <th>identifier</th>
+          <th>type</th>
+          <th>display name</th>
+          <th>avatar</th>
+          <th>profile</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each session.user.passports}}
+          <tr>
+            <td>{{identifier}}</td>
+            <td>{{type.label}}</td>
+            <td>{{displayName}}</td>
+            <td>
+              {{#if avatarUrl}}
+                <img {{bind-attr src=avatarUrl}} class="size-48">
+              {{/if}}
+            </td>
+            <td><a {{bind-attr href=profileUrl}}>{{profileUrl}}</a></td>
+          </tr>
+        {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
 </section>

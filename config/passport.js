@@ -55,6 +55,7 @@ module.exports.passport = {
     name:     'Google',
     protocol: 'oauth2',
     strategy: require('passport-google-oauth').OAuth2Strategy,
+    scope:    ['email', 'profile'],
     options:  {
       clientID:     'your-client-id',
       clientSecret: 'your-client-secret'
