@@ -1,6 +1,15 @@
 import DS from 'ember-data';
 import Ember from 'ember';
 
+export var TYPE_CODES = {
+  EMAIL:    'email',
+  USERNAME: 'username',
+  FACEBOOK: 'facebook',
+  GOOGLE:   'google',
+  TWITTER:  'twitter',
+  GITHUB:   'github'
+};
+
 export default DS.Model.extend({
   label: DS.attr('string'),
 

@@ -23,12 +23,13 @@ i.passport-icon {
   @include social-colors();
 }
 
+img.user-avatar {
+  background-color: #fff;
+  border-radius: 3px;
+  box-shadow: 0px 0px 1px #fff;
+}
+
 nav.top-bar {
-  img.user-avatar {
-    background-color: #fff;
-    border-radius: 3px;
-    box-shadow: 0px 0px 1px #fff;
-  }
   i.passport-icon {
     @include social-colors(10%);
     @include social-colors-glow();

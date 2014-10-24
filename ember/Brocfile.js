@@ -24,10 +24,12 @@ app.import('vendor/js/sails.io.js');
 app.import('bower_components/modernizr/modernizr.js');
 app.import('bower_components/fastclick/lib/fastclick.js');
 app.import('bower_components/momentjs/moment.js');
+app.import('bower_components/JavaScript-MD5/js/md5.js');
 app.import('bower_components/foundation/js/foundation.js');
 app.import('bower_components/foundation-icon-fonts/foundation-icons.eot');
 app.import('bower_components/foundation-icon-fonts/foundation-icons.woff');
 app.import('bower_components/foundation-icon-fonts/foundation-icons.svg');
 app.import('bower_components/foundation-icon-fonts/foundation-icons.ttf');
+app.import('bower_components/ember-uploader/dist/ember-uploader.js');
 
 module.exports = app.toTree();

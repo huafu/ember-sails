@@ -24,9 +24,7 @@
             <td>{{type.label}}</td>
             <td>{{displayName}}</td>
             <td>
-              {{#if avatarUrl}}
-                <img {{bind-attr src=avatarUrl}} class="size-48">
-              {{/if}}
+              {{user-avatar subject=this}}
             </td>
             <td><a {{bind-attr href=profileUrl}}>{{profileUrl}}</a></td>
           </tr>
