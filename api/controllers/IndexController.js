@@ -6,6 +6,7 @@ var Promise = require('bluebird');
 var IndexController = {
 
   index: function (req, res, next) {
+    var val;
     Promise.props({
       passportTypes:      PassportType.find(),
       geoLocationTypes:   GeoLocationType.find(),
@@ -13,9 +14,12 @@ var IndexController = {
       activityTypes:      ActivityType.find()
     })
       .then(function render(store) {
+        if(req.user){
+          req.user.flatInjectInPayload(store);
+        }
         res.view('index', {
           storeJson:       JSON.stringify(store),
-          sessionUserJson: JSON.stringify(req.user || {})
+          sessionUserId: req.user ? req.user.id : ''
         });
       }, next);
   }

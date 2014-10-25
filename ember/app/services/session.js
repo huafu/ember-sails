@@ -8,15 +8,12 @@ export default Ember.Object.extend({
   user: null,
 
   init: function () {
-    var user, adapter, store, model,
-      $meta = Ember.$('meta[name="session-user"]');
+    var userId, store,
+      $meta = Ember.$('meta[name="session-user-id"]');
     this._super();
-    if ((user = $meta.attr('content')) && (user = JSON.parse(user)) && user.id) {
+    if ((userId = $meta.attr('content')) && userId) {
       store = this.container.lookup('store:main');
-      model = store.modelFor('user');
-      adapter = store.adapterFor(model);
-      store.pushPayload(model, adapter._newPayload(store, model, user));
-      this.set('user', store.recordForId('user', user.id));
+      this.set('user', store.recordForId('user', userId));
     }
     else {
       this.set('user', null);

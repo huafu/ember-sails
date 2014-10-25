@@ -46,9 +46,50 @@ var User = {
     isClaimed:   { type: 'boolean', defaultsTo: true },
 
 
+    /**
+     * @returns {String}
+     */
     getSlugId: function () {
       return record.identify(this);
     },
+
+
+    /**
+     * Inject in given payload out data flattened
+     *
+     * @param {Object} payload
+     */
+    flatInjectInPayload: function (payload) {
+      var user = this.toJSON();
+
+      function inject(key, record) {
+        if (!payload[key]) {
+          payload[key] = [];
+        }
+        if (_.isArray(record)) {
+          _.each(record, function (r) {
+            payload[key].push(r);
+          });
+        }
+        else if (record && _.isObject(record)) {
+          payload[key].push(record);
+        }
+      }
+
+      if (_.isObject(user.email)) {
+        user.email = user.email.id;
+      }
+      if (_.isObject(user.username)) {
+        user.username = user.username.id;
+      }
+      if (_.isObject(user.avatar)) {
+        user.avatar = user.avatar.id;
+      }
+      inject('passports', user.passports);
+      user.passports = _.map(user.passports, 'id');
+      inject('users', user);
+    },
+
 
     /**
      * Associate a given passport to this user
