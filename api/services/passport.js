@@ -75,7 +75,7 @@ pass.connect = function (req, query, profile, next) {
   // start by checking input and grabbing some data from the given profile and query
   pc.start()
     .then(pc.checkInput.bind(pc))
-    .then(pc.parseProfile.bind(pc, profile))
+    .then(pc.parseProfile.bind(pc, profile, req))
     .then(pc.parseQuery.bind(pc, query))
     .then(pc.lookupPassportRecord.bind(pc))
     .then(function handleConnectScenario() {

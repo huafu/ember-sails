@@ -6,6 +6,7 @@ var Promise = require('bluebird');
 var model = require('../../lib/model');
 var record = require('../../lib/record');
 var validator = require('validator');
+var geo = require('../../lib/geo');
 
 var PassportConnection = function (user, provider, identifier) {
   this.userRecord = user || null;
@@ -52,7 +53,12 @@ var PassportConnection = function (user, provider, identifier) {
     });
   };
 
-  proto.parseProfile = function (profile) {
+  proto.parseProfile = function (profile, request) {
+    var loc;
+    // If we can geo-locate the user from the request:
+    if (request && (loc = geo.fromRequest(request))) {
+      _.merge(this.passport, loc);
+    }
     // If we have raw data, save it as well
     if (profile._json) {
       this.passport.raw = _.cloneDeep(profile._json);
