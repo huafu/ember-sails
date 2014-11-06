@@ -1,18 +1,20 @@
 var model = require('../lib/model');
 
 /**
- * ActivityType.js
+ * GeoLocationType.js
  *
  * @description :: TODO: You might write a short summary of how this model works and what it represents here.
  * @docs        :: http://sailsjs.org/#!documentation/models
  */
 
 module.exports = {
-  SIGNIN:  'sign-in',
-  SIGNOUT: 'sign-out',
-  SIGNUP:  'sign-up',
+  HOME:     'home',
+  WORK:     'office',
+  SIGNIN:   'sign-in',
+  CHECKIN:  'check-in',
+  VOLATILE: 'volatile',
 
-  autoPk: false,
+  autoPk:     false,
   // this is small data-set more like a config and should stay in local JSON
   connection: 'configDb',
 
@@ -22,10 +24,6 @@ module.exports = {
     label: {
       type:     'string',
       required: true
-    },
-
-    template: {
-      type: 'string'
     }
   },
 
@@ -35,9 +33,11 @@ module.exports = {
    */
   createMissingStandardTypes: function () {
     return this.findOrCreateEach([model.primaryKeyNameFor(this)], [
-      {id: this.SIGNIN, label: 'signed in'},
-      {id: this.SIGNOUT, label: 'signed out'},
-      {id: this.SIGNUP, label: 'signed up'}
+      {id: this.HOME, label: 'home'},
+      {id: this.WORK, label: 'work'},
+      {id: this.SIGNIN, label: 'sign-in'},
+      {id: this.CHECKIN, label: 'check-in'},
+      {id: this.VOLATILE, label: 'volatile'}
     ]);
   }
 };

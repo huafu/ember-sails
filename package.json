@@ -47,6 +47,6 @@
     "url": "git://github.com/huafu/ember-sails.git"
   },
   "author": "Huafu Gandon <huafu.gandon@gmail.com>",
-  "license": "MIT",
+  "license": "ISC",
   "devDependencies": {}
 }

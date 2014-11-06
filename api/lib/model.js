@@ -93,13 +93,19 @@ var self = module.exports = {
   attributes: {
 
     gender: function (extension) {
-      if (extension == null) {
-        extension = {};
-      }
       return _.merge({
         type:   'string',
         "enum": ['male', 'female', 'business', 'group']
-      }, extension);
+      }, extension || {});
+    },
+
+    pkCode: function (extension) {
+      return _.merge({
+        type:       'string',
+        size:       32,
+        required:   true,
+        primaryKey: true
+      }, extension || {});
     }
 
   }

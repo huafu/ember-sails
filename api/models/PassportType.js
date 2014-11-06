@@ -45,18 +45,15 @@ var PassportType = {
 
   // config
   autoPk:   false,
+  // this is small data-set more like a config and should stay in local JSON
+  connection: 'configDb',
 
   attributes: {
     /**
      * @property id
      * @type String
      */
-    id:    {
-      type:       'string',
-      size:       32,
-      required:   true,
-      primaryKey: true
-    },
+    id:    model.attributes.pkCode(),
     /**
      * @property label
      * @type String

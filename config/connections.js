@@ -31,6 +31,18 @@ module.exports.connections = {
   localDiskDb: {
     adapter:  'sails-disk',
     filePath: 'db/local-disk/'
+  },
+
+  /***************************************************************************
+   *                                                                          *
+   * Local disk storage for SMALL DATA_SET which almost never change       *
+   *                                                                          *
+   * Installed by default.                                                    *
+   *                                                                          *
+   ***************************************************************************/
+  configDb: {
+    adapter:  'sails-disk',
+    filePath: 'db/config/'
   }
 
   /***************************************************************************
