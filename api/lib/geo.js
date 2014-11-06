@@ -1,5 +1,6 @@
 var geoip = require('geoip-lite');
-var ipware = require('ipware');
+var ip = require('../lib/ip');
+var str = require('../lib/string');
 
 var geo = {
   /**
@@ -9,18 +10,33 @@ var geo = {
    * @return {{geoExtra: Object, latitude: Number, longitude: Number}|null}
    */
   fromRequest: function (req) {
-    var res, location, ipInfo = ipware.get_ip(req);
-    if (ipInfo && ipInfo.clientIpRoutable) {
-      location = geoip.lookup(ipInfo.clientIp);
+    var clientIp;
+    if ((clientIp = ip.fromRequest(req))) {
+      return geo.fromIp(clientIp);
+    }
+  },
+
+  /**
+   * Return the geo localization from the given IP if possible
+   * @method fromIp
+   * @param {String} clientIp
+   * @return {{geoExtra: Object, latitude: Number, longitude: Number}|null}
+   */
+  fromIp: function (clientIp) {
+    var res, location;
+    if ((location = geoip.lookup(clientIp))) {
+      sails.log.debug(str.fmt(
+        '[geo] mapped IP %@ to %@, %@, %@', location.city, location.region, location.country
+      ));
       res = Object.create(null);
       res.geoExtra = Object.create(null);
       // TODO: retrieve country and region names
       res.geoExtra.country = location.country;
       res.geoExtra.region = location.region;
       res.geoExtra.city = location.city;
-      res.geoExtra.ip = ipInfo.clientIp;
-      res.latitude = res.ll[0];
-      res.longitude = res.ll[1];
+      res.geoExtra.ip = clientIp;
+      res.latitude = location.ll[0];
+      res.longitude = location.ll[1];
       return res;
     }
   }

@@ -9,8 +9,6 @@ var IndexController = {
     var val;
     Promise.props({
       passportTypes:      PassportType.find(),
-      geoLocationTypes:   GeoLocationType.find(),
-      geoLocationSources: GeoLocationSource.find(),
       activityTypes:      ActivityType.find()
     })
       .then(function render(store) {

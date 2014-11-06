@@ -122,9 +122,8 @@
     "Passport",
     "PassportType",
     "User",
-    "GeoLocationType",
-    "GeoLocationSource",
-    "ActivityType"
+    "ActivityType",
+    "Activity"
   ],
   "indent":  2         // Specify indentation spacing
 }

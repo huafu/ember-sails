@@ -15,6 +15,7 @@
           <th>display name</th>
           <th>avatar</th>
           <th>gender</th>
+          <th>lat,lng</th>
           <th>profile</th>
         </tr>
         </thead>
@@ -28,6 +29,7 @@
               {{user-avatar subject=this}}
             </td>
             <td>{{gender}}</td>
+            <td>{{latLngString}}</td>
             <td><a {{bind-attr href=profileUrl}}>{{profileUrl}}</a></td>
           </tr>
         {{/each}}

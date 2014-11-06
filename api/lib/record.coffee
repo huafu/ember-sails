@@ -1,4 +1,5 @@
 model = require './model'
+str = require './string'
 
 self = module.exports =
   ###*
@@ -43,3 +44,25 @@ self = module.exports =
       "#{id1}" is "#{id2}"
     else
       no
+
+  ###*
+    Return an object identifying the given record in a polymorphic way
+
+    @param {Object} record
+    @param {String} [prepend]
+    @return {{id: Number|String, type: String}}
+  ###
+  polymorphize: (record, prepend) ->
+    res = Object.create null
+    idKey = 'id'
+    typeKey = 'type'
+    if prepend
+      idKey = prepend + str.capitalize(idKey)
+      typeKey = prepend + str.capitalize(typeKey)
+    if _.isObject(record)
+      res[idKey] = self.identify(record)
+      res[typeKey] = model.nameFor(record)
+    else
+      res[idKey] = null
+      res[typeKey] = null
+    res

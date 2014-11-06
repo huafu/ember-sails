@@ -19,6 +19,12 @@ module.exports.bootstrap = function (cb) {
   // check that we have our basic passport types
   PassportType.createMissingStandardTypes()
     .then(function () {
+      return ActivityType.createMissingStandardTypes();
+    })
+    .then(function () {
       cb();
-    }, cb);
+    })
+    .catch(function (error) {
+      cb(error);
+    });
 };

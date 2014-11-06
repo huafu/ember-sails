@@ -5,11 +5,22 @@ var WithGeoLocationMixin = Ember.Mixin.create({
   longitude: Ember.required(),
   geoExtra:  null,
 
-  latLngString: function () {
-    return '%@,%@'.fmt(
-      this.get('lat'), this.get('lng')
-    );
-  }.property('latitude', 'longitude').readOnly(),
+  latLngString: function (key, value) {
+    var match;
+    if (arguments.length > 1) {
+      if (value && (match = value.match(/^([0-9\.]+),([0-9\.]+)/))) {
+        this.set('latLngObject', {lat: parseFloat(match[1]), lng: parseFloat(match[2])});
+      }
+      else {
+        this.set('latLngObject', null);
+      }
+    }
+    if (this.get('latitude') && this.get('longitude')) {
+      return '%@,%@'.fmt(
+        this.get('latitude'), this.get('longitude')
+      );
+    }
+  }.property('latitude', 'longitude'),
 
   latLngObject: function (key, value) {
     var lat, lng, props = Object.create(null);
