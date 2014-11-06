@@ -1,3 +1,4 @@
+require '../busybox'
 fs = require 'fs'
 sysPath = require 'path'
 
