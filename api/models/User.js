@@ -39,6 +39,12 @@ var User = {
      * @type String
      */
     displayName: { type: 'string', required: true },
+
+    /**
+     * @property gender
+     * @type String
+     */
+    gender: model.attributes.gender(),
     /**
      * @property isClaimed
      * @type Boolean
@@ -308,6 +314,12 @@ var User = {
           str.fmt('using display name from passport %@ for user %@', passport.getSlugId(), this.getSlugId())
         );
         this.displayName = passport.displayName;
+      }
+      if (!this.gender && passport.gender) {
+        sails.log.verbose(
+          str.fmt('using gender from passport %@ for user %@', passport.getSlugId(), this.getSlugId())
+        );
+        this.gender = passport.gender;
       }
       return this;
     }

@@ -40,3 +40,7 @@ self = module.exports =
   primaryKeyNameFor: (item) ->
     self.for(item).primaryKey
 
+  attributes:
+    gender: (extension = {}) ->
+      _.merge { type: 'string', enum: ['male', 'female', 'business', 'group'] }, extension
+

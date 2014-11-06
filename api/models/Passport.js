@@ -1,6 +1,7 @@
 /* globals -Passport */
 
 var bcrypt = require('bcryptjs');
+var model = require('../lib/model');
 var record = require('../lib/record');
 var str = require('../lib/string');
 var Promise = require('bluebird');
@@ -137,6 +138,12 @@ var Passport = {
      * @type String
      */
     displayName: { type: 'string' },
+
+    /**
+     * @property gender
+     * @type String
+     */
+    gender: model.attributes.gender(),
     /**
      * @property avatarUrl
      * @type String
@@ -147,6 +154,11 @@ var Passport = {
      * @type String
      */
     profileUrl:  { type: 'url' },
+    /**
+     * @property raw
+     * @type Object
+     */
+    raw:     { type: 'json' },
 
     /**
      * Validate password used by the local strategy.

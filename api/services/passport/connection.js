@@ -53,6 +53,10 @@ var PassportConnection = function (user, provider, identifier) {
   };
 
   proto.parseProfile = function (profile) {
+    // If we have raw data, save it as well
+    if (profile._json) {
+      this.profile.raw = _.cloneDeep(profile._json);
+    }
     // If the profile object contains a list of emails...
     if (profile.hasOwnProperty('emails') && profile.emails.length) {
       for (var i = 0; i < profile.emails.length; i++) {
@@ -63,6 +67,14 @@ var PassportConnection = function (user, provider, identifier) {
           });
         }
       }
+    }
+    // parse the gender
+    // TODO: check for several people (group)
+    if (profile.hasOwnProperty('gender') && profile.gender) {
+      this.passport.gender = profile.gender;
+    }
+    else if (profile._json && profile._json.gender) {
+      this.passport.gender = profile._json.gender;
     }
     // If the profile object contains a username...
     if (profile.hasOwnProperty('username') && profile.username) {
@@ -126,6 +138,7 @@ var PassportConnection = function (user, provider, identifier) {
   proto.createUserRecord = function () {
     var self = this, user = {};
     user.displayName = this.passport.displayName;
+    user.gender = this.passport.gender;
     return User.create(user)
       .then(function (user) {
         self.userRecord = user;

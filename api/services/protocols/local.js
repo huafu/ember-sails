@@ -28,12 +28,18 @@ exports.register = function (req, res, next) {
     username = req.param('username'),
     password = req.param('password'),
     displayName = req.param('displayName'),
+    gender = req.param('gender'),
     user = null,
     error = null;
 
   if (!email) {
     req.flash('error', 'Error.Passport.Email.Missing');
     return next(new Error('No email was entered.'));
+  }
+
+  if (!gender) {
+    req.flash('error', 'Error.Passport.Gender.Missing');
+    return next(new Error('No gender was selected.'));
   }
 
   if (!password) {
