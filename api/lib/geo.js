@@ -26,7 +26,8 @@ var geo = {
     var res, location;
     if ((location = geoip.lookup(clientIp))) {
       sails.log.debug(str.fmt(
-        '[geo] mapped IP %@ to %@, %@, %@', location.city, location.region, location.country
+        '[geo] mapped IP %@ to %@, %@, %@',
+        clientIp, location.city, location.region, location.country
       ));
       res = Object.create(null);
       res.geoExtra = Object.create(null);
