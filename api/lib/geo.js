@@ -31,9 +31,15 @@ var geo = {
       res = Object.create(null);
       res.geoExtra = Object.create(null);
       // TODO: retrieve country and region names
-      res.geoExtra.country = location.country;
-      res.geoExtra.region = location.region;
-      res.geoExtra.city = location.city;
+      if (location.country) {
+        res.geoExtra.country = location.country;
+      }
+      if (location.region) {
+        res.geoExtra.region = location.region;
+      }
+      if (location.city) {
+        res.geoExtra.city = location.city;
+      }
       res.geoExtra.ip = clientIp;
       res.latitude = location.ll[0];
       res.longitude = location.ll[1];

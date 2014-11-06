@@ -3,7 +3,7 @@ import Ember from 'ember';
 var WithGeoLocationMixin = Ember.Mixin.create({
   latitude:  Ember.required(),
   longitude: Ember.required(),
-  geoExtra:  null,
+  geoExtra:  Ember.required(),
 
   latLngString: function (key, value) {
     var match;
