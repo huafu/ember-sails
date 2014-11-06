@@ -1,14 +1,6 @@
-import DS from 'ember-data';
 import Ember from 'ember';
+import ActivityTypeCore from './core/activity-type';
 
-export default DS.Model.extend({
-  label: DS.attr('string'),
-
-  template: DS.attr('string'),
-
-  createdAt: DS.attr('date'),
-
-  updatedAt: DS.attr('date'),
-
+export default ActivityTypeCore.extend({
   recordLabel: Ember.computed.alias('label')
 });

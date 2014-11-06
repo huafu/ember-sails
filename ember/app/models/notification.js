@@ -1,15 +1,6 @@
-import DS from 'ember-data';
+//import DS from 'ember-data';
+import NotificationCore from './core/notification';
 
-export default DS.Model.extend({
-  recipient: DS.belongsTo('passport'),
+export default NotificationCore.extend({
 
-  sender: DS.belongsTo('passport'),
-
-  activity: DS.belongsTo('activity'),
-
-  isRead: DS.attr('boolean', {defaultValue: false}),
-
-  createdAt: DS.attr('date'),
-
-  updatedAt: DS.attr('date')
 });

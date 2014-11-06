@@ -1,31 +1,8 @@
 import DS from 'ember-data';
+import PassportCore from './core/passport';
 
-export default DS.Model.extend({
-  protocol: DS.attr('string'),
-
-  password: DS.attr('string'),
-
-  identifier: DS.attr('string'),
-
-  tokens: DS.attr('json'),
-
-  lastLoginAt: DS.attr('date'),
-
-  lastLocation: DS.belongsTo('geoLocation'),
-
-  user: DS.belongsTo('user', {inverse: 'passports'}),
-
-  type: DS.belongsTo('passportType'),
-
-  displayName: DS.attr('string'),
-
-  avatarUrl: DS.attr('string'),
-
-  profileUrl: DS.attr('string'),
-
-  createdAt: DS.attr('date'),
-
-  updatedAt:     DS.attr('date'),
+export default PassportCore.extend({
+  password:      DS.attr('string'),
 
   // TODO: send this from the backend without storing it in the DB
   disconnectUrl: function () {

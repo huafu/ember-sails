@@ -1,5 +1,6 @@
-import DS from 'ember-data';
+//import DS from 'ember-data';
 import Ember from 'ember';
+import PassportTypeCore from './core/passport-type';
 
 export var TYPE_CODES = {
   EMAIL:    'email',
@@ -10,16 +11,10 @@ export var TYPE_CODES = {
   GITHUB:   'github'
 };
 
-export default DS.Model.extend({
-  label: DS.attr('string'),
-
-  createdAt: DS.attr('date'),
-
-  updatedAt: DS.attr('date'),
+export default PassportTypeCore.extend({
+  code:    Ember.computed.oneWay('id'),
 
   recordLabel: Ember.computed.alias('label'),
-
-  code:    Ember.computed.oneWay('id'),
 
   // TODO: send this from the backend without storing it in the DB
   authUrl: function () {

@@ -1,14 +1,7 @@
-import DS from 'ember-data';
+//import DS from 'ember-data';
 import Ember from 'ember';
+import GeoLocationSourceCore from './core/geo-location-source';
 
-export default DS.Model.extend({
-  label: DS.attr('string'),
-
-  accuracy: DS.attr('number', {defaultValue: 5}),
-
-  createdAt: DS.attr('date'),
-
-  updatedAt: DS.attr('date'),
-
+export default GeoLocationSourceCore.extend({
   recordLabel: Ember.computed.alias('label')
 });

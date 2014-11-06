@@ -9,7 +9,7 @@ ModelAttribute = require './ModelAttribute'
 
 MODELS_PATH = sysPath.resolve sysPath.join(__dirname, '..', '..', 'models')
 EMBER_MODELS_PATH = sysPath.resolve(
-  sysPath.join(__dirname, '..', '..', '..', 'ember', 'app', 'models')
+  sysPath.join(__dirname, '..', '..', '..', 'ember', 'app', 'models', 'core')
 )
 EMBER_TEMPLATE = '''
 import DS from 'ember-data';
@@ -80,7 +80,7 @@ class Model
     "DS.Model.extend({\n#{ all.join ',\n\n' }\n})"
 
 
-  writeEmberModelFile: (override = no) ->
+  writeEmberModelFile: (override = yes) ->
     file = @getEmberFilePath()
     exists = fs.existsSync file
     if not override and exists
