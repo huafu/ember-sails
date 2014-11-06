@@ -40,6 +40,15 @@ self = module.exports =
   primaryKeyNameFor: (item) ->
     self.for(item).primaryKey
 
+  addGeoAttributes: (required = no, attributes = {}) ->
+    if typeof required is 'object'
+      attributes = required
+      required = no
+    attributes.latitude = { required, type: 'float' }
+    attributes.longitude = { required, type: 'float' }
+    attributes.geoExtra = { type: 'json' }
+    attributes
+
   attributes:
     gender: (extension = {}) ->
       _.merge { type: 'string', enum: ['male', 'female', 'business', 'group'] }, extension

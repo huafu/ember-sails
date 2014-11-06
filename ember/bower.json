@@ -17,6 +17,7 @@
     "foundation-icon-fonts": "*",
     "momentjs": "~2.8.3",
     "ember-uploader": "~0.2.8",
-    "JavaScript-MD5": "~1.1.0"
+    "JavaScript-MD5": "~1.1.0",
+    "geolib": "~2.0.9"
   }
 }

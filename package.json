@@ -11,6 +11,7 @@
     "coffee-script": "^1.8.0",
     "ejs": "~1.0.0",
     "geoip-lite": "git://github.com/bluesmoon/node-geoip#3901781954d165f03e2f652f9543a48bc02502e1",
+    "geolib": "^2.0.14",
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-copy": "~0.5.0",

@@ -2,6 +2,7 @@
  * Created by huafu on 10/22/14.
  */
 require('coffee-script/register');
+require('./busybox');
 var logger = require('../lib/logger');
 
 //////// EXTRA LOGGING //////////////////

@@ -9,8 +9,6 @@ export default DS.Model.extend({
 
   lastLoginAt: DS.attr('date'),
 
-  lastLocation: DS.belongsTo('geoLocation'),
-
   user: DS.belongsTo('user', {inverse: 'passports'}),
 
   type: DS.belongsTo('passportType'),
@@ -24,6 +22,12 @@ export default DS.Model.extend({
   profileUrl: DS.attr('string'),
 
   raw: DS.attr('json'),
+
+  latitude: DS.attr('number'),
+
+  longitude: DS.attr('number'),
+
+  geoExtra: DS.attr('json'),
 
   createdAt: DS.attr('date'),
 

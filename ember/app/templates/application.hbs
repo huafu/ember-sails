@@ -14,6 +14,7 @@
           <th>type</th>
           <th>display name</th>
           <th>avatar</th>
+          <th>gender</th>
           <th>profile</th>
         </tr>
         </thead>
@@ -26,6 +27,7 @@
             <td>
               {{user-avatar subject=this}}
             </td>
+            <td>{{gender}}</td>
             <td><a {{bind-attr href=profileUrl}}>{{profileUrl}}</a></td>
           </tr>
         {{/each}}

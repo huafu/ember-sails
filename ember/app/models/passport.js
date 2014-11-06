@@ -1,7 +1,8 @@
 import DS from 'ember-data';
 import PassportCore from './core/passport';
+import WithGeoLocationMixin from '../mixins/with-geo-location';
 
-export default PassportCore.extend({
+export default PassportCore.extend(WithGeoLocationMixin, {
   password:      DS.attr('string'),
 
   // TODO: send this from the backend without storing it in the DB

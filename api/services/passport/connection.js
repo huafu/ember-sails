@@ -55,7 +55,7 @@ var PassportConnection = function (user, provider, identifier) {
   proto.parseProfile = function (profile) {
     // If we have raw data, save it as well
     if (profile._json) {
-      this.profile.raw = _.cloneDeep(profile._json);
+      this.passport.raw = _.cloneDeep(profile._json);
     }
     // If the profile object contains a list of emails...
     if (profile.hasOwnProperty('emails') && profile.emails.length) {

@@ -63,7 +63,7 @@ function grabPassportType(type) {
  * @constructor
  */
 var Passport = {
-  attributes: {
+  attributes: model.addGeoAttributes({
     // Required field: Protocol
     //
     // Defines the protocol to use for the passport. When employing the local
@@ -74,7 +74,7 @@ var Passport = {
      * @property protocol
      * @type String
      */
-    protocol:   { type: 'alphanumeric' },
+    protocol:   {type: 'alphanumeric'},
 
     // Local field: Password
     //
@@ -84,7 +84,7 @@ var Passport = {
      * @property password
      * @type String
      */
-    password:   { type: 'string', minLength: 8, 'protected': true },
+    password:   {type: 'string', minLength: 8, 'protected': true},
 
     // Provider fields: Provider, identifier and tokens
     //
@@ -104,61 +104,56 @@ var Passport = {
      * @property identifier
      * @type String
      */
-    identifier: { type: 'string', required: true },
+    identifier: {type: 'string', required: true},
     /**
      * @property tokens
      * @type Object
      */
-    tokens:     { type: 'json' },
+    tokens:     {type: 'json'},
 
     /**
      * @property lastLoginAt
      * @type Date
      */
-    lastLoginAt:    { type: 'datetime' },
-    /**
-     * @property lastLocation
-     * @type GeoLocation
-     */
-    lastLocation: { model: 'GeoLocation' },
+    lastLoginAt: {type: 'datetime'},
 
     /**
      * @property user
      * @type User
      */
-    user: { model: 'User', via: 'passports' },
+    user: {model: 'User', via: 'passports'},
     /**
      * @property type
      * @type PassportType
      */
-    type: { model: 'PassportType', required: true },
+    type: {model: 'PassportType', required: true},
 
     /**
      * @property displayName
      * @type String
      */
-    displayName: { type: 'string' },
+    displayName: {type: 'string'},
 
     /**
      * @property gender
      * @type String
      */
-    gender: model.attributes.gender(),
+    gender:     model.attributes.gender(),
     /**
      * @property avatarUrl
      * @type String
      */
-    avatarUrl:   { type: 'url' },
+    avatarUrl:  {type: 'url'},
     /**
      * @property profileUrl
      * @type String
      */
-    profileUrl:  { type: 'url' },
+    profileUrl: {type: 'url'},
     /**
      * @property raw
      * @type Object
      */
-    raw:     { type: 'json' },
+    raw:        {type: 'json'},
 
     /**
      * Validate password used by the local strategy.
@@ -222,7 +217,7 @@ var Passport = {
       return Passport.computeSlugId(this.getTypeCode(), this.identifier);
     }
 
-  },
+  }),
 
   /**
    * Callback to be run before creating a Passport.

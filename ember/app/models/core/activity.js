@@ -9,13 +9,17 @@ export default DS.Model.extend({
 
   subjectId: DS.attr('string'),
 
-  location: DS.belongsTo('geoLocation'),
-
   extra: DS.attr('json'),
 
   isDeleted: DS.attr('boolean', {defaultValue: false}),
 
   notifications: DS.hasMany('notification', {inverse: 'activity'}),
+
+  latitude: DS.attr('number'),
+
+  longitude: DS.attr('number'),
+
+  geoExtra: DS.attr('json'),
 
   createdAt: DS.attr('date'),
 
